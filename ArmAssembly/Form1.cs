@@ -16,5 +16,16 @@ namespace ArmAssembly
 		{
 			InitializeComponent();
 		}
+
+		private void Form1_Load(object sender, EventArgs e)
+		{
+			Visualizer Vis = new Visualizer();
+			Vis.MdiParent = this;
+			Vis.Show();
+
+			LssAnalyzer Analyzer = new LssAnalyzer();
+			Analyzer.MdiParent = this;
+			Analyzer.Show();
+		}
 	}
 }
