@@ -32,6 +32,52 @@ namespace ArmAssembly
 			return 0;
 		}
 
+		public string GetCurrnetSymbol()
+		{
+			if(tabSymbolAsm.SelectedTab != null)
+			{
+				return tabSymbolAsm.SelectedTab.Name;
+			}
+			else
+			{
+				return null;
+			}
+		}
+		public bool ResetPointer()
+		{
+			DataGridView data;
+			try
+			{
+				data = ControlList.Find(x => x.Tab.Equals(tabSymbolAsm.SelectedTab)).GridViewControl;
+			}
+			catch
+			{
+				return false;
+			}
+
+			if (data.Rows.Count == 0)
+				return false;
+
+			data.Rows[0].Selected = true;
+			return true;
+		}
+		public bool ToNextRow()
+		{
+			DataGridView data = ControlList.Find(x => x.Tab.Equals(tabSymbolAsm.SelectedTab)).GridViewControl;
+
+			if ((data.Rows.Count - 2) == data.SelectedRows[0].Index)
+				return false;
+
+			data.Rows[data.SelectedRows[0].Index + 1].Selected = true;
+			return true;
+		}
+		public DataGridViewRow GetCurrentRow()
+		{
+			DataGridView data = ControlList.Find(x => x.Tab.Equals(tabSymbolAsm.SelectedTab)).GridViewControl;
+
+			return data.SelectedRows[0];
+		}
+
 		public bool IsTableExist(string Symbol)
 		{
 			try
@@ -153,6 +199,7 @@ namespace ArmAssembly
 			this.ldgvData.RowHeadersVisible = false;
 			this.ldgvData.AllowUserToResizeRows = false;
 			this.ldgvData.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+			this.ldgvData.MultiSelect = false;
 			this.ldgvData.MouseClick += new MouseEventHandler(ldgvData_MouseClick);
 			((System.ComponentModel.ISupportInitialize)(this.ldgvData)).EndInit();
 

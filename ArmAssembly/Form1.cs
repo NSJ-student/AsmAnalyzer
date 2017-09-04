@@ -24,10 +24,6 @@ namespace ArmAssembly
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			Vis = new Visualizer();
-			Vis.MdiParent = this;
-			Vis.VisibleChanged += new EventHandler(FormVisibleStateChanged);
-
 			Sym = new ViewSymbolAsm();
 			Sym.MdiParent = this;
 			Sym.VisibleChanged += new EventHandler(FormVisibleStateChanged);
@@ -49,10 +45,6 @@ namespace ArmAssembly
 			else if (sender.Equals(Sym))
 			{
 				item = (ToolStripMenuItem)tsmiAsmAnalyzer;
-			}
-			else if (sender.Equals(Vis))
-			{
-				item = (ToolStripMenuItem)tsmiVisualizer;
 			}
 			else
 			{
@@ -97,27 +89,31 @@ namespace ArmAssembly
 				Sym.Show();
 			}
 		}
-
-		private void tsmiVisualizer_Click(object sender, EventArgs e)
+		
+		private void tsmiAnalyzeRun_Click(object sender, EventArgs e)
 		{
-			ToolStripMenuItem item = (ToolStripMenuItem)tsmiVisualizer;
-
-			if (item.Checked)
+			if (Sym.ResetPointer())
 			{
-				Vis.Hide();
-			}
-			else
-			{
+				Vis = new Visualizer(Sym.GetCurrnetSymbol());
+				Vis.MdiParent = this;
 				Vis.Show();
+
+				tsmiAnalyzeRun.Enabled = false;
+				tsmiNext.Enabled = true;
 			}
 		}
 
-		private void tsmiAnalyzeRun_Click(object sender, EventArgs e)
+		private void tsmiNext_Click(object sender, EventArgs e)
 		{
-			if(Vis.Visible == false)
+			if(Sym.ToNextRow())
 			{
-				Vis.Dock = DockStyle.Left;
-				Vis.Show();
+				Vis.SetInput(Sym.GetCurrentRow());
+			}
+			else
+			{
+				Vis.Dispose();
+				tsmiAnalyzeRun.Enabled = true;
+				tsmiNext.Enabled = false;
 			}
 		}
 	}

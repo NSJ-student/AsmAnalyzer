@@ -79,7 +79,18 @@
 			this.lbR0 = new System.Windows.Forms.Label();
 			this.txtR0 = new System.Windows.Forms.TextBox();
 			this.btnFormatR0 = new System.Windows.Forms.Button();
+			this.txtInst = new System.Windows.Forms.TextBox();
+			this.txtParam1 = new System.Windows.Forms.TextBox();
+			this.txtParam2 = new System.Windows.Forms.TextBox();
+			this.gbInput = new System.Windows.Forms.GroupBox();
+			this.txtInputAll = new System.Windows.Forms.TextBox();
+			this.txtParam2ToHex = new System.Windows.Forms.TextBox();
+			this.txtParam1ToHex = new System.Windows.Forms.TextBox();
+			this.label3 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
+			this.label1 = new System.Windows.Forms.Label();
 			this.tableLayoutPanel1.SuspendLayout();
+			this.gbInput.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// tableLayoutPanel1
@@ -681,12 +692,100 @@
 			this.btnFormatR0.UseVisualStyleBackColor = true;
 			this.btnFormatR0.Click += new System.EventHandler(this.ChangeRegisterFormat);
 			// 
+			// txtInst
+			// 
+			this.txtInst.Location = new System.Drawing.Point(78, 36);
+			this.txtInst.Name = "txtInst";
+			this.txtInst.Size = new System.Drawing.Size(55, 25);
+			this.txtInst.TabIndex = 1;
+			// 
+			// txtParam1
+			// 
+			this.txtParam1.Location = new System.Drawing.Point(78, 67);
+			this.txtParam1.Name = "txtParam1";
+			this.txtParam1.Size = new System.Drawing.Size(55, 25);
+			this.txtParam1.TabIndex = 2;
+			// 
+			// txtParam2
+			// 
+			this.txtParam2.Location = new System.Drawing.Point(78, 101);
+			this.txtParam2.Name = "txtParam2";
+			this.txtParam2.Size = new System.Drawing.Size(55, 25);
+			this.txtParam2.TabIndex = 3;
+			// 
+			// gbInput
+			// 
+			this.gbInput.Controls.Add(this.txtInputAll);
+			this.gbInput.Controls.Add(this.txtParam2ToHex);
+			this.gbInput.Controls.Add(this.txtParam1ToHex);
+			this.gbInput.Controls.Add(this.label3);
+			this.gbInput.Controls.Add(this.label2);
+			this.gbInput.Controls.Add(this.label1);
+			this.gbInput.Controls.Add(this.txtInst);
+			this.gbInput.Controls.Add(this.txtParam2);
+			this.gbInput.Controls.Add(this.txtParam1);
+			this.gbInput.Location = new System.Drawing.Point(270, 12);
+			this.gbInput.Name = "gbInput";
+			this.gbInput.Size = new System.Drawing.Size(212, 178);
+			this.gbInput.TabIndex = 4;
+			this.gbInput.TabStop = false;
+			this.gbInput.Text = "Inputs";
+			// 
+			// txtInputAll
+			// 
+			this.txtInputAll.Location = new System.Drawing.Point(18, 136);
+			this.txtInputAll.Name = "txtInputAll";
+			this.txtInputAll.Size = new System.Drawing.Size(176, 25);
+			this.txtInputAll.TabIndex = 9;
+			// 
+			// txtParam2ToHex
+			// 
+			this.txtParam2ToHex.Location = new System.Drawing.Point(139, 101);
+			this.txtParam2ToHex.Name = "txtParam2ToHex";
+			this.txtParam2ToHex.Size = new System.Drawing.Size(55, 25);
+			this.txtParam2ToHex.TabIndex = 8;
+			// 
+			// txtParam1ToHex
+			// 
+			this.txtParam1ToHex.Location = new System.Drawing.Point(139, 67);
+			this.txtParam1ToHex.Name = "txtParam1ToHex";
+			this.txtParam1ToHex.Size = new System.Drawing.Size(55, 25);
+			this.txtParam1ToHex.TabIndex = 7;
+			// 
+			// label3
+			// 
+			this.label3.AutoSize = true;
+			this.label3.Location = new System.Drawing.Point(15, 104);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(54, 15);
+			this.label3.TabIndex = 6;
+			this.label3.Text = "param2";
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(15, 71);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(54, 15);
+			this.label2.TabIndex = 5;
+			this.label2.Text = "param1";
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(15, 40);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(30, 15);
+			this.label1.TabIndex = 4;
+			this.label1.Text = "Inst";
+			// 
 			// Visualizer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.AutoScroll = true;
-			this.ClientSize = new System.Drawing.Size(380, 536);
+			this.ClientSize = new System.Drawing.Size(497, 536);
+			this.Controls.Add(this.gbInput);
 			this.Controls.Add(this.tableLayoutPanel1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
 			this.Name = "Visualizer";
@@ -694,6 +793,8 @@
 			this.Text = "Visualizer";
 			this.tableLayoutPanel1.ResumeLayout(false);
 			this.tableLayoutPanel1.PerformLayout();
+			this.gbInput.ResumeLayout(false);
+			this.gbInput.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -751,5 +852,15 @@
 		private System.Windows.Forms.Label lbR0;
 		private System.Windows.Forms.TextBox txtR0;
 		private System.Windows.Forms.Button btnFormatR0;
+		private System.Windows.Forms.TextBox txtInst;
+		private System.Windows.Forms.TextBox txtParam1;
+		private System.Windows.Forms.TextBox txtParam2;
+		private System.Windows.Forms.GroupBox gbInput;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.TextBox txtParam2ToHex;
+		private System.Windows.Forms.TextBox txtParam1ToHex;
+		private System.Windows.Forms.TextBox txtInputAll;
 	}
 }

@@ -13,7 +13,7 @@ namespace ArmAssembly
 	public partial class Visualizer : Form
 	{
 		RegisterControl[] RegArray;
-		public Visualizer()
+		public Visualizer(string SymbolName)
 		{
 			InitializeComponent();
 			RegArray = new RegisterControl[17];
@@ -34,6 +34,47 @@ namespace ArmAssembly
 			RegArray[14] = new RegisterControl(btnFormatR14, txtR14);
 			RegArray[15] = new RegisterControl(btnFormatR15, txtR15);
 			RegArray[16] = new RegisterControl(btnFormatAll, null);
+
+			this.Text += " - " + SymbolName;
+		}
+
+		public void SetInput(DataGridViewRow row)
+		{
+			DataRowView view = (DataRowView)row.DataBoundItem;
+			object[] input = view.Row.ItemArray;
+
+			if(input[1].Equals("assembly"))
+			{
+				try
+				{
+					txtInst.Text = (string)input[5];
+					string[] split = ((string)input[6]).Split(new char[] { ',', ' ' }, 2);
+					if (split.Length >= 2)
+					{
+						txtParam1.Text = split[0];
+						txtParam2.Text = split[1].TrimStart();
+					}
+					else
+					{
+						txtParam1.Text = (string)input[6];
+						txtParam2.Clear();
+					}
+					txtInputAll.Text = (string)input[8];
+				}
+				catch
+				{
+					txtInst.Clear();
+					txtParam1.Clear();
+					txtInputAll.Text = "Error";
+				}
+			}
+			else
+			{
+				txtInst.Clear();
+				txtParam1.Clear();
+				txtInputAll.Text = (string)input[8];
+			}
+
 		}
 
 		private void ChangeRegisterFormat(object sender, EventArgs e)
