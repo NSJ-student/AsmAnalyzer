@@ -688,6 +688,7 @@
 			this.AutoScroll = true;
 			this.ClientSize = new System.Drawing.Size(380, 536);
 			this.Controls.Add(this.tableLayoutPanel1);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
 			this.Name = "Visualizer";
 			this.ShowIcon = false;
 			this.Text = "Visualizer";

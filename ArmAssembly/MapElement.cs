@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.ComponentModel;
+using System.Data;
+using System.Reflection;
 
 namespace ArmAssembly
 {
@@ -12,8 +14,9 @@ namespace ArmAssembly
 	{
 		public delegate void UpdateProgress(int value);
 		public string[] AllStrings;
+		public DataSet MapDataSet;
 		public List<MapElements> ElementList;
-		public List<MapElements> SymbolList;
+
 		public MapContainer(string FileName)
 		{
 			ElementList = new List<MapElements>();
@@ -56,13 +59,25 @@ namespace ArmAssembly
 					}
 				}
 			}
+
+			MapDataSet = new DataSet();
+			MapDataSet.Tables.Add(UserConvert.ToDataTable(ElementList, "MapTable"));
 		}
 		public MapContainer(string FileName, UpdateProgress Update)
 		{
 			ElementList = new List<MapElements>();
-			SymbolList = new List<MapElements>();
 			AllStrings = File.ReadAllLines(FileName);
-			for (int cnt = 0; cnt < AllStrings.Length; cnt++)
+			int cnt = 0;
+			
+			for (; cnt < AllStrings.Length; cnt++)
+			{
+				string str = AllStrings[cnt];
+				if(str.Equals("Memory Configuration"))
+				{
+					break;
+				}
+			}
+			for (; cnt < AllStrings.Length; cnt++)
 			{
 				string str = AllStrings[cnt];
 				Update((cnt + 1) * 100 / AllStrings.Length);
@@ -101,12 +116,18 @@ namespace ArmAssembly
 					}
 				}
 			}
+
+			MapDataSet = new DataSet();
+			MapDataSet.Tables.Add(UserConvert.ToDataTable(ElementList, "MapTable"));
 		}
 	}
+
 	public class MapElements
 	{
+		static uint refCount = 0;
 		public enum MapType
 		{
+			SYM_VECTOR,
 			SYM_TEXT,
 			SYM_RODATA,
 			SYM_RAMFUNC,
@@ -116,17 +137,27 @@ namespace ArmAssembly
 			SYM_STACK,
 			SYM_NONE
 		};
+		uint IndexNum;
 		MapType Type;
 		string SymbolName;
 		uint MemAddr;
 		uint MemSize;
 		string FileLocation;
+
+		public uint Index
+		{
+			get
+			{
+				return IndexNum;
+			}
+		}
 		public string Area
 		{
 			get
 			{
 				switch(Type)
 				{
+					case MapType.SYM_VECTOR: return "vectors";
 					case MapType.SYM_DATA: return "data";
 					case MapType.SYM_TEXT: return "text";
 					case MapType.SYM_RODATA: return "rodata";
@@ -153,11 +184,11 @@ namespace ArmAssembly
 				return MemAddr.ToString("X");
 			}
 		}
-		public string Size
+		public uint Size
 		{
 			get
 			{
-				return MemSize.ToString();
+				return MemSize;
 			}
 		}
 		public string Location
@@ -167,15 +198,23 @@ namespace ArmAssembly
 				return FileLocation;
 			}
 		}
-
-
+		
 		public MapElements(string[] input)
 		{
+			refCount++;
+			IndexNum = refCount;
 			// .(type).(symbolname)
 			string[] split1 = input[0].Split(new char[] { "       ".ToCharArray()[0], "                ".ToCharArray()[0] }, StringSplitOptions.RemoveEmptyEntries);
 			string[] split2 = split1[0].Split(new char[] { ".".ToCharArray()[0] }, StringSplitOptions.RemoveEmptyEntries);
 			Type = SortMapType(split2[0]);
-			SymbolName = split2[1];
+			if(split2.Length > 1)
+			{
+				SymbolName = split2[1];
+			}
+			else
+			{
+				SymbolName = "";
+			}
 			
 			if (split1.Length == 1)
 			{
@@ -191,17 +230,20 @@ namespace ArmAssembly
 					FileLocation += " ";
 				}
 			}
-			else if (split1.Length == 4)
+			else if (split1.Length >= 3)
 			{
 				MemAddr = Convert.ToUInt32(split1[1].Remove(0, 2), 16);
 				MemSize = Convert.ToUInt32(split1[2].Remove(0, 2), 16);
-				int cnt = 0;
-				while (true)
+				if(split1.Length == 4)
 				{
-					FileLocation += split1[cnt + 3];
-					cnt++;
-					if (cnt >= split1.Length-3) break;
-					FileLocation += " ";
+					int cnt = 0;
+					while (true)
+					{
+						FileLocation += split1[cnt + 3];
+						cnt++;
+						if (cnt >= split1.Length - 3) break;
+						FileLocation += " ";
+					}
 				}
 			}
 		}
@@ -211,6 +253,10 @@ namespace ArmAssembly
 			if (strMapType.Equals("text"))
 			{
 				return MapType.SYM_TEXT;
+			}
+			else if (strMapType.Equals("vectors"))
+			{
+				return MapType.SYM_VECTOR;
 			}
 			else if (strMapType.Equals("rodata"))
 			{
@@ -238,13 +284,17 @@ namespace ArmAssembly
 		{
 			string[] split1 = strInput.Split(new char[] { "       ".ToCharArray()[0], "                ".ToCharArray()[0] }, StringSplitOptions.RemoveEmptyEntries);
 			string[] split2 = split1[0].Split(new char[] { ".".ToCharArray()[0] }, StringSplitOptions.RemoveEmptyEntries);
-			if (split2.Length < 2)
-				return MapType.SYM_NONE;
+//			if (split2.Length < 2)
+//				return MapType.SYM_NONE;
 			string strMapType = split2[0];
 
 			if (strMapType.Equals("text"))
 			{
 				return MapType.SYM_TEXT;
+			}
+			else if (strMapType.Equals("vectors"))
+			{
+				return MapType.SYM_VECTOR;
 			}
 			else if (strMapType.Equals("rodata"))
 			{

@@ -35,7 +35,6 @@
 			this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
 			this.btnLoadMapFile = new System.Windows.Forms.Button();
 			this.txtMapFileName = new System.Windows.Forms.TextBox();
-			this.btnOpenMatchSymbol = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dgvMapList)).BeginInit();
 			this.tableLayoutPanel1.SuspendLayout();
 			this.SuspendLayout();
@@ -43,6 +42,7 @@
 			// txtLssFileName
 			// 
 			this.txtLssFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+			this.tableLayoutPanel1.SetColumnSpan(this.txtLssFileName, 3);
 			this.txtLssFileName.Location = new System.Drawing.Point(471, 3);
 			this.txtLssFileName.Name = "txtLssFileName";
 			this.txtLssFileName.ReadOnly = true;
@@ -74,33 +74,40 @@
 			// dgvMapList
 			// 
 			this.dgvMapList.AllowUserToOrderColumns = true;
+			this.dgvMapList.AllowUserToResizeRows = false;
 			this.dgvMapList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.dgvMapList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.tableLayoutPanel1.SetColumnSpan(this.dgvMapList, 4);
+			this.dgvMapList.BackgroundColor = System.Drawing.SystemColors.ControlLightLight;
+			this.dgvMapList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+			this.tableLayoutPanel1.SetColumnSpan(this.dgvMapList, 6);
+			this.dgvMapList.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
 			this.dgvMapList.Location = new System.Drawing.Point(3, 63);
 			this.dgvMapList.Name = "dgvMapList";
+			this.dgvMapList.ReadOnly = true;
+			this.dgvMapList.RowHeadersVisible = false;
 			this.dgvMapList.RowTemplate.Height = 27;
 			this.dgvMapList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dgvMapList.Size = new System.Drawing.Size(775, 347);
 			this.dgvMapList.TabIndex = 3;
+			this.dgvMapList.DoubleClick += new System.EventHandler(this.dgvMapList_DoubleClick);
+			this.dgvMapList.MouseClick += new System.Windows.Forms.MouseEventHandler(this.dgvMapList_MouseClick);
 			// 
 			// tableLayoutPanel1
 			// 
-			this.tableLayoutPanel1.ColumnCount = 4;
+			this.tableLayoutPanel1.ColumnCount = 6;
 			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
 			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
 			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
-			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
-			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15F));
+			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
+			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15F));
 			this.tableLayoutPanel1.Controls.Add(this.dgvMapList, 1, 2);
-			this.tableLayoutPanel1.Controls.Add(this.pbLssLoadRate, 1, 1);
 			this.tableLayoutPanel1.Controls.Add(this.btnLoadMapFile, 0, 0);
 			this.tableLayoutPanel1.Controls.Add(this.btnLoadLssFile, 2, 0);
 			this.tableLayoutPanel1.Controls.Add(this.txtMapFileName, 1, 0);
 			this.tableLayoutPanel1.Controls.Add(this.txtLssFileName, 3, 0);
-			this.tableLayoutPanel1.Controls.Add(this.btnOpenMatchSymbol, 2, 1);
+			this.tableLayoutPanel1.Controls.Add(this.pbLssLoadRate, 1, 1);
 			this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
 			this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -135,25 +142,17 @@
 			this.txtMapFileName.Size = new System.Drawing.Size(306, 25);
 			this.txtMapFileName.TabIndex = 5;
 			// 
-			// btnOpenMatchSymbol
-			// 
-			this.btnOpenMatchSymbol.Location = new System.Drawing.Point(393, 33);
-			this.btnOpenMatchSymbol.Name = "btnOpenMatchSymbol";
-			this.btnOpenMatchSymbol.Size = new System.Drawing.Size(72, 23);
-			this.btnOpenMatchSymbol.TabIndex = 6;
-			this.btnOpenMatchSymbol.Text = "Open";
-			this.btnOpenMatchSymbol.UseVisualStyleBackColor = true;
-			this.btnOpenMatchSymbol.Click += new System.EventHandler(this.btnOpenMatchSymbol_Click);
-			// 
 			// LssAnalyzer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(781, 413);
 			this.Controls.Add(this.tableLayoutPanel1);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
 			this.Name = "LssAnalyzer";
 			this.ShowIcon = false;
 			this.Text = "LssAnalyzer";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.LssAnalyzer_FormClosing);
 			((System.ComponentModel.ISupportInitialize)(this.dgvMapList)).EndInit();
 			this.tableLayoutPanel1.ResumeLayout(false);
 			this.tableLayoutPanel1.PerformLayout();
@@ -170,6 +169,5 @@
 		private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
 		private System.Windows.Forms.Button btnLoadMapFile;
 		private System.Windows.Forms.TextBox txtMapFileName;
-		private System.Windows.Forms.Button btnOpenMatchSymbol;
 	}
 }

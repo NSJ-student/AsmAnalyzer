@@ -53,6 +53,7 @@ namespace ArmAssembly
 	}
 	public class LssElements
 	{
+		static uint refCount = 0;
 		public enum LssType
 		{
 			SYMBOL_NAME,
@@ -62,6 +63,7 @@ namespace ArmAssembly
 			ARR_DATA,
 			ANYTHING_ELSE
 		};
+		uint IndexNum;
 		LssType Type;
 		string EntireString;
 		uint MemoryPosition;
@@ -71,6 +73,13 @@ namespace ArmAssembly
 		uint hexInstruction;
 		string Comment;
 
+		public uint Index
+		{
+			get
+			{
+				return IndexNum;
+			}
+		}
 		public string Area
 		{
 			get
@@ -155,6 +164,8 @@ namespace ArmAssembly
 
 		public LssElements(string strLine)
 		{
+			refCount++;
+			IndexNum = refCount;
 			EntireString = strLine;
 			if(strLine.Length >= 10)
 			{

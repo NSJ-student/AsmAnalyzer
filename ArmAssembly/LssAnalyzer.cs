@@ -12,16 +12,40 @@ namespace ArmAssembly
 {
 	public partial class LssAnalyzer : Form
 	{
+		public delegate int AddSymbolASM(LssContainer Source, int StartIndex, int EndIndex);
+		public delegate bool IsTableExists(string Symbol);
 		BackgroundWorker LssLoadWorker;
 		BackgroundWorker MapLoadWorker;
+		BindingSource MapBindingSource;
 		LssContainer LssList;
 		MapContainer MapList;
+
+		AddSymbolASM AddSymbol;
+		IsTableExists IsSymbolExist;
+
+		public AddSymbolASM AddSymbolTable
+		{
+			set
+			{
+				AddSymbol = value;
+			}
+		}
+		public IsTableExists IsTableExist
+		{
+			set
+			{
+				IsSymbolExist = value;
+			}
+		}
+
 		public LssAnalyzer()
 		{
 			InitializeComponent();
 
 			pbLssLoadRate.Visible = false;
 			btnLoadLssFile.Enabled = false;
+
+			MapBindingSource = new BindingSource();
 
 			LssLoadWorker = new BackgroundWorker();
 			LssLoadWorker.WorkerReportsProgress = true;
@@ -73,8 +97,11 @@ namespace ArmAssembly
 		}
 		public void AddMapComponentsComplete(object obj, RunWorkerCompletedEventArgs arg)
 		{
+			MapBindingSource.DataSource = MapList.MapDataSet;
+			MapBindingSource.DataMember = MapList.MapDataSet.Tables[0].TableName;
 			dgvMapList.DataSource = null;
-			dgvMapList.DataSource = MapList.ElementList;
+			dgvMapList.DataSource = MapBindingSource;
+			dgvMapList.AutoGenerateColumns = true;
 			pbLssLoadRate.Visible = false;
 			btnLoadLssFile.Enabled = true;
 			MessageBox.Show("Load Map File Completed!");
@@ -92,41 +119,145 @@ namespace ArmAssembly
 				MapLoadWorker.RunWorkerAsync(MapList);
 			}
 		}
-
-		private void btnOpenMatchSymbol_Click(object sender, EventArgs e)
+		
+		private void dgvMapList_DoubleClick(object sender, EventArgs e)
 		{
+			if (dgvMapList.SelectedRows.Count == 0)
+			{
+				MessageBox.Show("No Symbol Selected!");
+				return;
+			}
 			DataGridViewSelectedRowCollection test = dgvMapList.SelectedRows;
 			string[] symbols = new string[test.Count];
 			int index = 0;
 
 			foreach (DataGridViewRow item in test)
 			{
-				MapElements element = (MapElements)item.DataBoundItem;
-				if(Convert.ToInt32(element.Address, 16) == 0)
+				string ItemSymbol;
+				string ItemAddress;
+				try
+				{
+					DataRowView view = (DataRowView)item.DataBoundItem;
+					ItemSymbol = (string)view.Row.ItemArray[2];
+					ItemAddress = (string)view.Row.ItemArray[3];
+				}
+				catch
+				{
+					MapElements element = (MapElements)item.DataBoundItem;
+					ItemSymbol = element.Symbol;
+					ItemAddress = element.Address;
+				}
+
+				if (Convert.ToInt32(ItemAddress, 16) == 0)
 				{
 					return;
 				}
-				symbols[index] = element.Symbol;
-				
-				int SymbolIndex = LssList.SymbolList.FindIndex(x => x.Memory.Equals(element.Address, StringComparison.OrdinalIgnoreCase));
-				int StartIndex, EndIndex;
-				StartIndex = LssList.ElementList.FindIndex(x => 
-						!string.IsNullOrEmpty(x.Memory) && x.Memory.Equals(LssList.SymbolList[SymbolIndex].Memory, StringComparison.OrdinalIgnoreCase));
-				if (SymbolIndex != LssList.SymbolList.Count - 1)
-				{
-					EndIndex = LssList.ElementList.FindIndex(x =>
-						!string.IsNullOrEmpty(x.Memory) && x.Memory.Equals(LssList.SymbolList[SymbolIndex+1].Memory, StringComparison.OrdinalIgnoreCase));
-				}
-				else
-				{
-					EndIndex = LssList.ElementList.Count;
-				}
 
-				ViewSymbolAsm TestWindow = new ViewSymbolAsm(LssList, StartIndex, EndIndex);
-				TestWindow.Show();
+				if (IsSymbolExist(ItemSymbol) == true)
+				{
+					MessageBox.Show("<" + ItemSymbol + "> Already Exists!");
+					return;
+				}
+				symbols[index] = ItemSymbol;
+
+				try
+				{
+					int SymbolIndex = LssList.SymbolList.FindIndex(x => x.Memory.Equals(ItemAddress, StringComparison.OrdinalIgnoreCase));
+					if(SymbolIndex < 0)
+					{
+						throw new NullReferenceException();
+					}
+					int StartIndex, EndIndex;
+					StartIndex = LssList.ElementList.FindIndex(x =>
+							!string.IsNullOrEmpty(x.Memory) && x.Memory.Equals(LssList.SymbolList[SymbolIndex].Memory, StringComparison.OrdinalIgnoreCase));
+					if (SymbolIndex != LssList.SymbolList.Count - 1)
+					{
+						EndIndex = LssList.ElementList.FindIndex(x =>
+							!string.IsNullOrEmpty(x.Memory) && x.Memory.Equals(LssList.SymbolList[SymbolIndex + 1].Memory, StringComparison.OrdinalIgnoreCase));
+					}
+					else
+					{
+						EndIndex = LssList.ElementList.Count;
+					}
+					
+					AddSymbol?.Invoke(LssList, StartIndex, EndIndex);
+				}
+				catch (NullReferenceException arg)
+				{
+					MessageBox.Show("No Reference!");
+					return;
+				}
 
 				index++;
 			}
 		}
+		
+		private void LssAnalyzer_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			e.Cancel = true;
+			Hide();
+		}
+		
+		/// <summary>
+		/// Right Click Menu
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void dgvMapList_MouseClick(object sender, MouseEventArgs e)
+		{
+			if (e.Button == MouseButtons.Right)
+			{
+				ContextMenu m = MakeContextMenu();
+
+				m.Show(dgvMapList, new Point(e.X, e.Y));
+			}
+		}
+		private ContextMenu MakeContextMenu()
+		{
+			ContextMenu m = new ContextMenu();
+
+			MenuItem item1 = new MenuItem("Select Columns");
+			MenuItem item2 = new MenuItem("Find");
+
+			item1.Click += new EventHandler(dgvMapList_SelectColumn);
+			item2.Click += new EventHandler(dgvMapList_FindRow);
+
+			m.MenuItems.Add(item1);
+			m.MenuItems.Add(item2);
+			/*
+			int currentMouseOverRow = dgvMapList.HitTest(e.X, e.Y).RowIndex;
+
+			if (currentMouseOverRow >= 0)
+			{
+				m.MenuItems.Add(new MenuItem(string.Format("Do something to row {0}", currentMouseOverRow.ToString())));
+			}
+			*/
+			return m;
+		}
+		private void dgvMapList_SelectColumn(object sender, EventArgs e)
+		{
+			SelectColums select = new SelectColums(dgvMapList);
+			select.Show();
+		}
+		private void dgvMapList_FindRow(object sender, EventArgs e)
+		{
+			FindRows find = new FindRows(new FindRows.AdjustFilter(dgvMapList_Filter), dgvMapList);
+			find.Show();
+		}
+		private bool dgvMapList_Filter(string filter)
+		{
+			try
+			{
+				MapBindingSource.Filter = filter;
+				dgvMapList.DataSource = null;
+				dgvMapList.DataSource = MapBindingSource;
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
 	}
 }

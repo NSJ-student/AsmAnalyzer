@@ -28,37 +28,35 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.dgvSymbolAsm = new System.Windows.Forms.DataGridView();
-			((System.ComponentModel.ISupportInitialize)(this.dgvSymbolAsm)).BeginInit();
+			this.tabSymbolAsm = new System.Windows.Forms.TabControl();
 			this.SuspendLayout();
 			// 
-			// dgvSymbolAsm
+			// tabSymbolAsm
 			// 
-			this.dgvSymbolAsm.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dgvSymbolAsm.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.dgvSymbolAsm.Location = new System.Drawing.Point(0, 0);
-			this.dgvSymbolAsm.Name = "dgvSymbolAsm";
-			this.dgvSymbolAsm.RowTemplate.Height = 27;
-			this.dgvSymbolAsm.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-			this.dgvSymbolAsm.Size = new System.Drawing.Size(567, 384);
-			this.dgvSymbolAsm.TabIndex = 0;
+			this.tabSymbolAsm.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tabSymbolAsm.Location = new System.Drawing.Point(0, 0);
+			this.tabSymbolAsm.Name = "tabSymbolAsm";
+			this.tabSymbolAsm.SelectedIndex = 0;
+			this.tabSymbolAsm.Size = new System.Drawing.Size(567, 384);
+			this.tabSymbolAsm.TabIndex = 1;
+			this.tabSymbolAsm.MouseClick += new System.Windows.Forms.MouseEventHandler(this.tabSymbolAsm_MouseClick);
 			// 
 			// ViewSymbolAsm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(567, 384);
-			this.Controls.Add(this.dgvSymbolAsm);
+			this.Controls.Add(this.tabSymbolAsm);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
 			this.Name = "ViewSymbolAsm";
 			this.ShowIcon = false;
 			this.Text = "ViewSymbolAsm";
-			((System.ComponentModel.ISupportInitialize)(this.dgvSymbolAsm)).EndInit();
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ViewSymbolAsm_FormClosing);
 			this.ResumeLayout(false);
 
 		}
 
 		#endregion
-
-		private System.Windows.Forms.DataGridView dgvSymbolAsm;
+		private System.Windows.Forms.TabControl tabSymbolAsm;
 	}
 }
