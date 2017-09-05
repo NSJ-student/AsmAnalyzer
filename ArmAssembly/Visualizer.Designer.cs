@@ -83,6 +83,9 @@
 			this.txtParam1 = new System.Windows.Forms.TextBox();
 			this.txtParam2 = new System.Windows.Forms.TextBox();
 			this.gbInput = new System.Windows.Forms.GroupBox();
+			this.txtParam3ToHex = new System.Windows.Forms.TextBox();
+			this.label4 = new System.Windows.Forms.Label();
+			this.txtParam3 = new System.Windows.Forms.TextBox();
 			this.txtInputAll = new System.Windows.Forms.TextBox();
 			this.txtParam2ToHex = new System.Windows.Forms.TextBox();
 			this.txtParam1ToHex = new System.Windows.Forms.TextBox();
@@ -715,6 +718,9 @@
 			// 
 			// gbInput
 			// 
+			this.gbInput.Controls.Add(this.txtParam3ToHex);
+			this.gbInput.Controls.Add(this.label4);
+			this.gbInput.Controls.Add(this.txtParam3);
 			this.gbInput.Controls.Add(this.txtInputAll);
 			this.gbInput.Controls.Add(this.txtParam2ToHex);
 			this.gbInput.Controls.Add(this.txtParam1ToHex);
@@ -726,14 +732,37 @@
 			this.gbInput.Controls.Add(this.txtParam1);
 			this.gbInput.Location = new System.Drawing.Point(270, 12);
 			this.gbInput.Name = "gbInput";
-			this.gbInput.Size = new System.Drawing.Size(212, 178);
+			this.gbInput.Size = new System.Drawing.Size(212, 232);
 			this.gbInput.TabIndex = 4;
 			this.gbInput.TabStop = false;
 			this.gbInput.Text = "Inputs";
 			// 
+			// txtParam3ToHex
+			// 
+			this.txtParam3ToHex.Location = new System.Drawing.Point(139, 135);
+			this.txtParam3ToHex.Name = "txtParam3ToHex";
+			this.txtParam3ToHex.Size = new System.Drawing.Size(55, 25);
+			this.txtParam3ToHex.TabIndex = 12;
+			// 
+			// label4
+			// 
+			this.label4.AutoSize = true;
+			this.label4.Location = new System.Drawing.Point(15, 138);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(54, 15);
+			this.label4.TabIndex = 11;
+			this.label4.Text = "param3";
+			// 
+			// txtParam3
+			// 
+			this.txtParam3.Location = new System.Drawing.Point(78, 135);
+			this.txtParam3.Name = "txtParam3";
+			this.txtParam3.Size = new System.Drawing.Size(55, 25);
+			this.txtParam3.TabIndex = 10;
+			// 
 			// txtInputAll
 			// 
-			this.txtInputAll.Location = new System.Drawing.Point(18, 136);
+			this.txtInputAll.Location = new System.Drawing.Point(18, 178);
 			this.txtInputAll.Name = "txtInputAll";
 			this.txtInputAll.Size = new System.Drawing.Size(176, 25);
 			this.txtInputAll.TabIndex = 9;
@@ -862,5 +891,8 @@
 		private System.Windows.Forms.TextBox txtParam2ToHex;
 		private System.Windows.Forms.TextBox txtParam1ToHex;
 		private System.Windows.Forms.TextBox txtInputAll;
+		private System.Windows.Forms.TextBox txtParam3ToHex;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.TextBox txtParam3;
 	}
 }

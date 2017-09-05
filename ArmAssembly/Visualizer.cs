@@ -48,23 +48,19 @@ namespace ArmAssembly
 				try
 				{
 					txtInst.Text = (string)input[5];
-					string[] split = ((string)input[6]).Split(new char[] { ',', ' ' }, 2);
-					if (split.Length >= 2)
+					string[] Par = AsmInterpreter.SplitParam((string)input[6]);
+					for(int cnt=0; cnt<Par.Length; cnt++)
 					{
-						txtParam1.Text = split[0];
-						txtParam2.Text = split[1].TrimStart();
+						RegArray[cnt].txtValue.Text = Par[cnt];
 					}
-					else
-					{
-						txtParam1.Text = (string)input[6];
-						txtParam2.Clear();
-					}
+
 					txtInputAll.Text = (string)input[8];
 				}
 				catch
 				{
 					txtInst.Clear();
 					txtParam1.Clear();
+					txtParam2.Clear();
 					txtInputAll.Text = "Error";
 				}
 			}
@@ -72,6 +68,7 @@ namespace ArmAssembly
 			{
 				txtInst.Clear();
 				txtParam1.Clear();
+				txtParam2.Clear();
 				txtInputAll.Text = (string)input[8];
 			}
 
