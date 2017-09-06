@@ -51,7 +51,9 @@ namespace ArmAssembly
 					string[] Par = AsmInterpreter.SplitParam((string)input[6]);
 					for(int cnt=0; cnt<Par.Length; cnt++)
 					{
-						RegArray[cnt].txtValue.Text = Par[cnt];
+						AsmInterpreter.ParamType type = AsmInterpreter.ParamType.None;
+						RegArray[cnt].txtValue.Text = AsmInterpreter.ParseToHex(Par[cnt], RegArray, ref type);
+						RegArray[15].txtValue.Text = type.ToString();
 					}
 
 					txtInputAll.Text = (string)input[8];

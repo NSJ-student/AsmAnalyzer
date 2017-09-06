@@ -10,6 +10,7 @@ namespace ArmAssembly
 	{
 		public enum ParamType
 		{
+			Register,
 			AbsoluteAddress,
 			RegRelativeAddress,
 			PcRelativeAddress,
@@ -44,35 +45,119 @@ namespace ArmAssembly
 			}
 		}
 
-		public static string ParseToHex(string Input, RegisterControl[] RegArray)
+		public static string GetRegValue(string strReg, RegisterControl[] Reg)
 		{
+			string regnum = strReg.Replace("r", "").Trim();
+			string RegValue = Reg[Convert.ToUInt32(regnum)].txtValue.Text;
+
+			if (RegValue.Length == 0)
+			{
+				return strReg;
+			}
+			else
+			{
+				string Format = Reg[Convert.ToUInt32(regnum)].btnFormat.Text;
+				if (Format.Equals("DEX"))
+				{
+					uint value = Convert.ToUInt32(RegValue);
+					return value.ToString("X");
+				}
+				else
+				{
+					return RegValue;
+				}
+			}
+		}
+
+		public static string AddHexString(string Old, string AddHex)
+		{
+			string result = Old;
+			
+			if ((AddHex[0] == 'r') ||
+				(AddHex[0] == 'p'))
+			{
+				result += AddHex;
+			}
+			else if ((result.Length != 0) &&
+					 ((Old[0] == 'r') ||  (Old[0] == 'p')))
+			{
+				result += " + " + AddHex;
+			}
+			else
+			{
+				if(Old.Length == 0)
+				{
+					Old = "0";
+				}
+				uint oldVal = Convert.ToUInt32(Old, 16);
+				uint addVal = Convert.ToUInt32(AddHex, 16);
+				result = (oldVal + addVal).ToString("X");
+			}
+			
+			return result;
+		}
+
+		public static string ParseToHex(string Input, RegisterControl[] Reg, ref ParamType type)
+		{
+			string result = "";
+
 			if (Input[0] == 'r')
 			{
 				// register
+				type = ParamType.Register;
 			}
 			else if (Input[0] == '[')
 			{
 				// relative address
+				string[] split = Input.Split(new char[] { ' ', ',', '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
+				foreach (string item in split)
+				{
+					if(item[0] == 'r')
+					{
+						type = ParamType.RegRelativeAddress;
+						string reg_val = GetRegValue(item, Reg);
+						result = AddHexString(result, reg_val);
+					}
+					if (item[0] == 'p')
+					{
+						type = ParamType.PcRelativeAddress;
+						result = AddHexString(result, item);
+					}
+					else if(item[0] == '#')
+					{
+						string dec = item.Replace("#", "");
+						uint value = Convert.ToUInt32(dec);
+						result = AddHexString(result, value.ToString("X"));
+					}
+				}
 			}
 			else if (Input[0] == '{')
 			{
 				// vector
+				type = ParamType.None;
 			}
 			else if (Input[0] == '<')
 			{
 				// symbol
+				type = ParamType.None;
 			}
 			else if (Input[0] == '#')
 			{
 				// decimal
+				type = ParamType.Integer;
+				string dec = Input.Replace("#", "");
+				uint value = Convert.ToUInt32(dec);
+				result = AddHexString(result, value.ToString("X"));
 			}
 			else if (((0 <= Input[0]) && (Input[0] <= '9')) ||
 					 (('a' <= Input[0]) && (Input[0] <= 'z')))
 			{
 				// hexa
+				type = ParamType.Integer;
+				result = Input;
 			}
 
-			return null;
+			return result;
 		}
 
 		public static string[] SplitParam(string Param)

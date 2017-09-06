@@ -92,6 +92,7 @@
 			this.label3 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
+			this.lbStack = new System.Windows.Forms.ListBox();
 			this.tableLayoutPanel1.SuspendLayout();
 			this.gbInput.SuspendLayout();
 			this.SuspendLayout();
@@ -808,12 +809,22 @@
 			this.label1.TabIndex = 4;
 			this.label1.Text = "Inst";
 			// 
+			// lbStack
+			// 
+			this.lbStack.FormattingEnabled = true;
+			this.lbStack.ItemHeight = 15;
+			this.lbStack.Location = new System.Drawing.Point(316, 276);
+			this.lbStack.Name = "lbStack";
+			this.lbStack.Size = new System.Drawing.Size(120, 214);
+			this.lbStack.TabIndex = 5;
+			// 
 			// Visualizer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.AutoScroll = true;
 			this.ClientSize = new System.Drawing.Size(497, 536);
+			this.Controls.Add(this.lbStack);
 			this.Controls.Add(this.gbInput);
 			this.Controls.Add(this.tableLayoutPanel1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
@@ -894,5 +905,6 @@
 		private System.Windows.Forms.TextBox txtParam3ToHex;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.TextBox txtParam3;
+		private System.Windows.Forms.ListBox lbStack;
 	}
 }
