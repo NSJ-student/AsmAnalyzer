@@ -8,6 +8,7 @@ namespace ArmAssembly
 {
 	public static class AsmInterpreter
 	{
+		public delegate object[] GetMatchedRow(string memory);
 		public enum ParamType
 		{
 			Register,
@@ -19,7 +20,7 @@ namespace ArmAssembly
 			None
 		};
 
-		// RowArray[10]
+		// Source[10]
 		// 0 index
 		// 1 area
 		// 2 memory
@@ -30,6 +31,181 @@ namespace ArmAssembly
 		// 7 comment
 		// 8 allstring
 		// 9 element type
+		public static void ParseInstruction(object[] Source, RegisterControl[] Regs, GetMatchedRow getMemValue)
+		{
+			string MemAddr		= (string)Source[2];
+			string Instruction	= (string)Source[5];
+			string Parameter	= (string)Source[6];
+
+
+			if(Instruction.Equals("mov") || Instruction.Equals("movs"))
+			{
+				string[] Pars = SplitParam(Parameter);
+
+				ParamType dstType = ParamType.None;
+				ParamType srcType = ParamType.None;
+				string dest = ParseToHexString(MemAddr, Pars[0], Regs, ref dstType);
+				string src = ParseToHexString(MemAddr, Pars[1], Regs, ref srcType);
+
+				if(dstType == ParamType.Register)
+				{
+					uint regPos = Convert.ToUInt32(dest.Replace("r", ""));
+					if ((srcType == ParamType.RegRelativeAddress) ||
+						(srcType == ParamType.PcRelativeAddress) ||
+						(srcType == ParamType.AbsoluteAddress))
+					{
+						object[] memRow = getMemValue(src);
+						if (memRow != null)
+						{
+							Regs[regPos].txtValue.Text = ((string)memRow[6]).Replace("0x", "");
+						}
+						else
+						{
+							Regs[regPos].txtValue.Text = "Can't find " + src;
+						}
+					}
+					else
+					{
+						Regs[regPos].txtValue.Text = src;
+					}
+				}
+				else if((dstType != ParamType.None) && (dstType != ParamType.Vector))
+				{
+					// 특정 어드레스로 출력
+					Regs[14].txtValue.Text = dest;
+					if( (srcType == ParamType.RegRelativeAddress) ||
+						(srcType == ParamType.PcRelativeAddress) ||
+						(srcType == ParamType.AbsoluteAddress))
+					{
+						object[] memRow = getMemValue(src);
+						if(memRow != null)
+						{
+							Regs[15].txtValue.Text = ((string)memRow[6]).Replace("0x", "");
+						}
+						else
+						{
+							Regs[15].txtValue.Text = "Can't find " + src;
+						}
+					}
+					else
+					{
+						Regs[15].txtValue.Text = src;
+					}
+				}
+			}
+			if (Instruction.Equals("str") || Instruction.Equals("strb"))
+			{
+				string[] Pars = SplitParam(Parameter);
+
+				ParamType dstType = ParamType.None;
+				ParamType srcType = ParamType.None;
+				string src = ParseToHexString(MemAddr, Pars[0], Regs, ref srcType);
+				string dest = ParseToHexString(MemAddr, Pars[1], Regs, ref dstType);
+
+				if (srcType == ParamType.Register)
+				{
+					uint regPos = Convert.ToUInt32(dest.Replace("r", ""));
+					if ((srcType == ParamType.RegRelativeAddress) ||
+						(srcType == ParamType.PcRelativeAddress) ||
+						(srcType == ParamType.AbsoluteAddress))
+					{
+						object[] memRow = getMemValue(src);
+						if (memRow != null)
+						{
+							Regs[regPos].txtValue.Text = ((string)memRow[6]).Replace("0x", "");
+						}
+						else
+						{
+							Regs[regPos].txtValue.Text = "Can't find " + src;
+						}
+					}
+					else
+					{
+						Regs[regPos].txtValue.Text = src;
+					}
+				}
+				else if ((srcType != ParamType.None) && (srcType != ParamType.Vector))
+				{
+					// 특정 어드레스로 출력
+					Regs[14].txtValue.Text = dest;
+					if ((srcType == ParamType.RegRelativeAddress) ||
+						(srcType == ParamType.PcRelativeAddress) ||
+						(srcType == ParamType.AbsoluteAddress))
+					{
+						object[] memRow = getMemValue(src);
+						if (memRow != null)
+						{
+							Regs[15].txtValue.Text = ((string)memRow[6]).Replace("0x", "");
+						}
+						else
+						{
+							Regs[15].txtValue.Text = "Can't find " + src;
+						}
+					}
+					else
+					{
+						Regs[15].txtValue.Text = src;
+					}
+				}
+			}
+			if (Instruction.Equals("ldr") || Instruction.Equals("ldrb"))
+			{
+				string[] Pars = SplitParam(Parameter);
+
+				ParamType dstType = ParamType.None;
+				ParamType srcType = ParamType.None;
+				string dest = ParseToHexString(MemAddr, Pars[0], Regs, ref dstType);
+				string src = ParseToHexString(MemAddr, Pars[1], Regs, ref srcType);
+
+				if (dstType == ParamType.Register)
+				{
+					uint regPos = Convert.ToUInt32(dest.Replace("r", ""));
+					if ((srcType == ParamType.RegRelativeAddress) ||
+						(srcType == ParamType.PcRelativeAddress) ||
+						(srcType == ParamType.AbsoluteAddress))
+					{
+						object[] memRow = getMemValue(src);
+						if (memRow != null)
+						{
+							Regs[regPos].txtValue.Text = ((string)memRow[6]).Replace("0x", "");
+						}
+						else
+						{
+							Regs[regPos].txtValue.Text = "Can't find " + src;
+						}
+					}
+					else
+					{
+						Regs[regPos].txtValue.Text = src;
+					}
+				}
+				else if ((dstType != ParamType.None) && (dstType != ParamType.Vector))
+				{
+					// 특정 어드레스로 출력
+					Regs[14].txtValue.Text = dest;
+					if ((srcType == ParamType.RegRelativeAddress) ||
+						(srcType == ParamType.PcRelativeAddress) ||
+						(srcType == ParamType.AbsoluteAddress))
+					{
+						object[] memRow = getMemValue(src);
+						if (memRow != null)
+						{
+							Regs[15].txtValue.Text = ((string)memRow[6]).Replace("0x", "");
+						}
+						else
+						{
+							Regs[15].txtValue.Text = "Can't find " + src;
+						}
+					}
+					else
+					{
+						Regs[15].txtValue.Text = src;
+					}
+				}
+			}
+
+		}
+
 		public static ParamType GetSourceType(object[] RowArray)
 		{
 			if((LssElements.LssType)RowArray[9] == LssElements.LssType.ASSEM_INSTRUCTION)
@@ -97,7 +273,7 @@ namespace ArmAssembly
 			return result;
 		}
 
-		public static string ParseToHex(string Input, RegisterControl[] Reg, ref ParamType type)
+		public static string ParseToHexString(string pc, string Input, RegisterControl[] Reg, ref ParamType type)
 		{
 			string result = "";
 
@@ -105,6 +281,7 @@ namespace ArmAssembly
 			{
 				// register
 				type = ParamType.Register;
+				result = Input;
 			}
 			else if (Input[0] == '[')
 			{
@@ -118,10 +295,11 @@ namespace ArmAssembly
 						string reg_val = GetRegValue(item, Reg);
 						result = AddHexString(result, reg_val);
 					}
-					if (item[0] == 'p')
+					if (item.Equals("pc"))
 					{
 						type = ParamType.PcRelativeAddress;
-						result = AddHexString(result, item);
+						result = AddHexString(result, pc);
+						result = AddHexString(result, "4");
 					}
 					else if(item[0] == '#')
 					{

@@ -27,12 +27,22 @@ namespace ArmAssembly
 			Sym = new ViewSymbolAsm();
 			Sym.MdiParent = this;
 			Sym.VisibleChanged += new EventHandler(FormVisibleStateChanged);
-
-			Analyzer = new LssAnalyzer();
+			splitContainer2.Panel2.Controls.Add(Sym);
+			Sym.Dock = DockStyle.Fill;
+			Sym.Show();
+			
+			Analyzer = new LssAnalyzer(UpdateProgressBar);
 			Analyzer.MdiParent = this;
 			Analyzer.VisibleChanged += new EventHandler(FormVisibleStateChanged);
 			Analyzer.AddSymbolTable = new LssAnalyzer.AddSymbolASM(Sym.AddAsmTab);
 			Analyzer.IsTableExist = new LssAnalyzer.IsTableExists(Sym.IsTableExist);
+			splitContainer2.Panel1.Controls.Add(Analyzer);
+			Analyzer.Dock = DockStyle.Fill;
+			Analyzer.Show();
+
+			ToolStripProgressBar bar = new ToolStripProgressBar("FileLoadRate");
+			bar.Alignment = ToolStripItemAlignment.Right;
+			msMenu.Items.Add(bar);
 		}
 
 		private void FormVisibleStateChanged(object sender, EventArgs e)
@@ -94,8 +104,10 @@ namespace ArmAssembly
 		{
 			if (Sym.ResetPointer())
 			{
-				Vis = new Visualizer(Sym.GetCurrnetSymbol());
+				Vis = new Visualizer(Sym.GetCurrnetSymbol(), Sym.GetMemoryRow);
 				Vis.MdiParent = this;
+				splitContainer1.Panel1.Controls.Add(Vis);
+				Vis.Dock = DockStyle.Fill;
 				Vis.Show();
 
 				tsmiAnalyzeRun.Enabled = false;
@@ -115,6 +127,13 @@ namespace ArmAssembly
 				tsmiAnalyzeRun.Enabled = true;
 				tsmiNext.Enabled = false;
 			}
+		}
+		
+		private void UpdateProgressBar(object obj, ProgressChangedEventArgs arg)
+		{
+			ToolStripProgressBar bar = (ToolStripProgressBar)msMenu.Items["FileLoadRate"];
+
+			bar.Value = arg.ProgressPercentage;
 		}
 	}
 }

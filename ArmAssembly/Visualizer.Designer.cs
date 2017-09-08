@@ -93,6 +93,7 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.lbStack = new System.Windows.Forms.ListBox();
+			this.pbRegClear = new System.Windows.Forms.Button();
 			this.tableLayoutPanel1.SuspendLayout();
 			this.gbInput.SuspendLayout();
 			this.SuspendLayout();
@@ -818,16 +819,27 @@
 			this.lbStack.Size = new System.Drawing.Size(120, 214);
 			this.lbStack.TabIndex = 5;
 			// 
+			// pbRegClear
+			// 
+			this.pbRegClear.Location = new System.Drawing.Point(270, 500);
+			this.pbRegClear.Name = "pbRegClear";
+			this.pbRegClear.Size = new System.Drawing.Size(75, 23);
+			this.pbRegClear.TabIndex = 6;
+			this.pbRegClear.Text = "Clear";
+			this.pbRegClear.UseVisualStyleBackColor = true;
+			this.pbRegClear.Click += new System.EventHandler(this.pbRegClear_Click);
+			// 
 			// Visualizer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.AutoScroll = true;
 			this.ClientSize = new System.Drawing.Size(497, 536);
+			this.Controls.Add(this.pbRegClear);
 			this.Controls.Add(this.lbStack);
 			this.Controls.Add(this.gbInput);
 			this.Controls.Add(this.tableLayoutPanel1);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
 			this.Name = "Visualizer";
 			this.ShowIcon = false;
 			this.Text = "Visualizer";
@@ -906,5 +918,6 @@
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.TextBox txtParam3;
 		private System.Windows.Forms.ListBox lbStack;
+		private System.Windows.Forms.Button pbRegClear;
 	}
 }

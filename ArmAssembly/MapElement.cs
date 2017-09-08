@@ -21,7 +21,17 @@ namespace ArmAssembly
 		{
 			ElementList = new List<MapElements>();
 			AllStrings = File.ReadAllLines(FileName);
-			for (int cnt = 0; cnt < AllStrings.Length; cnt++)
+			int cnt = 0;
+
+			for (; cnt < AllStrings.Length; cnt++)
+			{
+				string str = AllStrings[cnt];
+				if (str.Equals("Memory Configuration"))
+				{
+					break;
+				}
+			}
+			for (; cnt < AllStrings.Length; cnt++)
 			{
 				string str = AllStrings[cnt];
 				if (!str.Replace(" ", string.Empty).Equals(""))
@@ -116,9 +126,11 @@ namespace ArmAssembly
 					}
 				}
 			}
+			Update((cnt + 1) * 100 / AllStrings.Length);
 
 			MapDataSet = new DataSet();
 			MapDataSet.Tables.Add(UserConvert.ToDataTable(ElementList, "MapTable"));
+			Update(0);
 		}
 	}
 

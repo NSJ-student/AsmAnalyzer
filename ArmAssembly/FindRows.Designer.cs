@@ -35,8 +35,6 @@
 			this.cbOperator = new System.Windows.Forms.ComboBox();
 			this.txtMapFilter = new System.Windows.Forms.TextBox();
 			this.lbFilter = new System.Windows.Forms.Label();
-			this.cbType = new System.Windows.Forms.ComboBox();
-			this.lbType = new System.Windows.Forms.Label();
 			this.btnFindOK = new System.Windows.Forms.Button();
 			this.btnReset = new System.Windows.Forms.Button();
 			this.tpFindString = new System.Windows.Forms.TabPage();
@@ -86,8 +84,6 @@
 			this.tableLayoutPanel1.Controls.Add(this.cbOperator, 2, 0);
 			this.tableLayoutPanel1.Controls.Add(this.txtMapFilter, 3, 0);
 			this.tableLayoutPanel1.Controls.Add(this.lbFilter, 0, 0);
-			this.tableLayoutPanel1.Controls.Add(this.cbType, 1, 1);
-			this.tableLayoutPanel1.Controls.Add(this.lbType, 0, 1);
 			this.tableLayoutPanel1.Controls.Add(this.btnFindOK, 4, 1);
 			this.tableLayoutPanel1.Controls.Add(this.btnReset, 3, 1);
 			this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -113,7 +109,8 @@
 			this.cbOperator.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
 			this.cbOperator.FormattingEnabled = true;
 			this.cbOperator.Items.AddRange(new object[] {
-            "==",
+            "LIKE",
+            "=",
             "<=",
             ">=",
             "<",
@@ -142,31 +139,6 @@
 			this.lbFilter.Size = new System.Drawing.Size(77, 15);
 			this.lbFilter.TabIndex = 4;
 			this.lbFilter.Text = "Filter:";
-			// 
-			// cbType
-			// 
-			this.cbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-			this.cbType.FormattingEnabled = true;
-			this.cbType.Items.AddRange(new object[] {
-            "string",
-            "integer"});
-			this.cbType.Location = new System.Drawing.Point(86, 37);
-			this.cbType.Name = "cbType";
-			this.cbType.Size = new System.Drawing.Size(77, 23);
-			this.cbType.TabIndex = 5;
-			this.cbType.Text = "string";
-			this.cbType.SelectedIndexChanged += new System.EventHandler(this.cbType_SelectedIndexChanged);
-			// 
-			// lbType
-			// 
-			this.lbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-			this.lbType.AutoSize = true;
-			this.lbType.Font = new System.Drawing.Font("Gulim", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-			this.lbType.Location = new System.Drawing.Point(3, 41);
-			this.lbType.Name = "lbType";
-			this.lbType.Size = new System.Drawing.Size(77, 15);
-			this.lbType.TabIndex = 6;
-			this.lbType.Text = "Type: ";
 			// 
 			// btnFindOK
 			// 
@@ -288,8 +260,6 @@
 		private System.Windows.Forms.ComboBox cbOperator;
 		private System.Windows.Forms.TextBox txtMapFilter;
 		private System.Windows.Forms.Label lbFilter;
-		private System.Windows.Forms.ComboBox cbType;
-		private System.Windows.Forms.Label lbType;
 		private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
 		private System.Windows.Forms.Label lbStringFilter;
 		private System.Windows.Forms.TextBox txtStringFilter;

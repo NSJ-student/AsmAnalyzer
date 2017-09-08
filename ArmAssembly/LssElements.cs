@@ -49,6 +49,7 @@ namespace ArmAssembly
 				}
 				Update((cnt + 1) * 100 / AllStrings.Length);
 			}
+			Update(0);
 		}
 	}
 	public class LssElements

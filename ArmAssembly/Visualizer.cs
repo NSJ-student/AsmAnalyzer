@@ -12,10 +12,14 @@ namespace ArmAssembly
 {
 	public partial class Visualizer : Form
 	{
+		AsmInterpreter.GetMatchedRow GetMemRow;
 		RegisterControl[] RegArray;
-		public Visualizer(string SymbolName)
+		public Visualizer(string SymbolName, AsmInterpreter.GetMatchedRow callback)
 		{
 			InitializeComponent();
+
+			GetMemRow = callback;
+
 			RegArray = new RegisterControl[17];
 			RegArray[0] = new RegisterControl(btnFormatR0, txtR0);
 			RegArray[1] = new RegisterControl(btnFormatR1, txtR1);
@@ -38,25 +42,45 @@ namespace ArmAssembly
 			this.Text += " - " + SymbolName;
 		}
 
-		public void SetInput(DataGridViewRow row)
+		public void SetInput(object[] input)
 		{
-			DataRowView view = (DataRowView)row.DataBoundItem;
-			object[] input = view.Row.ItemArray;
-
 			if(input[1].Equals("assembly"))
 			{
 				try
 				{
-					txtInst.Text = (string)input[5];
-					string[] Par = AsmInterpreter.SplitParam((string)input[6]);
+					string MemAddr = (string)input[2];
+					string Instruction = (string)input[5];
+					string Parameter = (string)input[6];
+					string[] Par = AsmInterpreter.SplitParam(Parameter);
+					/*
 					for(int cnt=0; cnt<Par.Length; cnt++)
 					{
 						AsmInterpreter.ParamType type = AsmInterpreter.ParamType.None;
-						RegArray[cnt].txtValue.Text = AsmInterpreter.ParseToHex(Par[cnt], RegArray, ref type);
+						RegArray[cnt].txtValue.Text = AsmInterpreter.ParseToHexString(MemAddr, Par[cnt], RegArray, ref type);
 						RegArray[15].txtValue.Text = type.ToString();
 					}
+					*/
 
+					AsmInterpreter.ParamType type = AsmInterpreter.ParamType.None;
+					txtInst.Text = Instruction;
+					if (Par.Length > 0)
+					{
+						txtParam1.Text = Par[0];
+						txtParam1ToHex.Text = AsmInterpreter.ParseToHexString(MemAddr, Par[0], RegArray, ref type);
+					}
+					if (Par.Length > 1)
+					{
+						txtParam2.Text = Par[1];
+						txtParam2ToHex.Text = AsmInterpreter.ParseToHexString(MemAddr, Par[1], RegArray, ref type);
+					}
+					if (Par.Length > 2)
+					{
+						txtParam3.Text = Par[2];
+						txtParam3ToHex.Text = AsmInterpreter.ParseToHexString(MemAddr, Par[2], RegArray, ref type);
+					}
 					txtInputAll.Text = (string)input[8];
+
+					AsmInterpreter.ParseInstruction(input, RegArray, GetMemRow);
 				}
 				catch
 				{
@@ -108,6 +132,14 @@ namespace ArmAssembly
 				{
 					ClickedButton.Text = "HEX";
 				}
+			}
+		}
+
+		private void pbRegClear_Click(object sender, EventArgs e)
+		{
+			foreach(RegisterControl item in RegArray)
+			{
+				item.txtValue.Clear();
 			}
 		}
 	}

@@ -27,27 +27,23 @@ namespace ArmAssembly
 				cbCmpSrc.Items.Add(item.Name);
 			}
 			cbCmpSrc.Text = (string)cbCmpSrc.Items[0];
-
-			if (cbType.Text.Equals("string"))
-			{
-				cbOperator.Text = "LIKE";
-				cbOperator.Enabled = false;
-			}
 		}
 
 		private void btnFindOK_Click(object sender, EventArgs e)
 		{
 			string strFilter;
-			if (cbType.Text == "string")
+
+			if(cbOperator.Text.Equals("LIKE"))
 			{
-				strFilter = (string)cbCmpSrc.SelectedItem
-							+ " LIKE '" + txtMapFilter.Text + "'";
+				strFilter = "[" + (string)cbCmpSrc.SelectedItem + "]"
+							+ " LIKE '%" + txtMapFilter.Text + "%'";
 			}
 			else
 			{
 				strFilter = (string)cbCmpSrc.SelectedItem
-							+ " " + (string)cbOperator.SelectedItem + " " + txtMapFilter.Text;
+							+ " " + cbOperator.Text + " '" + txtMapFilter.Text + "'";
 			}
+
 			if (Filter(strFilter))
 				txtMapFilter.BackColor = Color.White;
 			else
@@ -68,16 +64,7 @@ namespace ArmAssembly
 
 		private void cbType_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			if (cbType.Text.Equals("string"))
-			{
-				cbOperator.Text = "LIKE";
-				cbOperator.Enabled = false;
-			}
-			else
-			{
-				cbOperator.Text = (string)cbOperator.Items[0];
-				cbOperator.Enabled = true;
-			}
+			cbOperator.Text = (string)cbOperator.Items[0];
 		}
 
 		private void btnReset_Click(object sender, EventArgs e)

@@ -12,6 +12,7 @@ namespace ArmAssembly
 {
 	public partial class LssAnalyzer : Form
 	{
+		public delegate void ProgressBarUpdate(object obj, ProgressChangedEventArgs arg);
 		public delegate int AddSymbolASM(LssContainer Source, int StartIndex, int EndIndex);
 		public delegate bool IsTableExists(string Symbol);
 		BackgroundWorker LssLoadWorker;
@@ -20,6 +21,7 @@ namespace ArmAssembly
 		LssContainer LssList;
 		MapContainer MapList;
 
+		ProgressBarUpdate UpdateProgressBar;
 		AddSymbolASM AddSymbol;
 		IsTableExists IsSymbolExist;
 
@@ -38,11 +40,10 @@ namespace ArmAssembly
 			}
 		}
 
-		public LssAnalyzer()
+		public LssAnalyzer(ProgressBarUpdate progress = null)
 		{
 			InitializeComponent();
-
-			pbLssLoadRate.Visible = false;
+			
 			btnLoadLssFile.Enabled = false;
 
 			MapBindingSource = new BindingSource();
@@ -51,30 +52,37 @@ namespace ArmAssembly
 			LssLoadWorker.WorkerReportsProgress = true;
 			LssLoadWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(AddLssComponentsComplete);
 			LssLoadWorker.DoWork += new DoWorkEventHandler(AddLssComponents);
-			LssLoadWorker.ProgressChanged += new ProgressChangedEventHandler(UpdateProgressBar);
 
 			MapLoadWorker = new BackgroundWorker();
 			MapLoadWorker.WorkerReportsProgress = true;
 			MapLoadWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(AddMapComponentsComplete);
 			MapLoadWorker.DoWork += new DoWorkEventHandler(AddMapComponents);
-			MapLoadWorker.ProgressChanged += new ProgressChangedEventHandler(UpdateProgressBar);
+
+			UpdateProgressBar = progress;
+			if (progress != null)
+			{
+				LssLoadWorker.ProgressChanged += new ProgressChangedEventHandler(progress);
+				MapLoadWorker.ProgressChanged += new ProgressChangedEventHandler(progress);
+			}
 		}
 
 		private void AddLssComponents(object obj, DoWorkEventArgs arg)
 		{
-//			LssContainer lss = (LssContainer)arg.Argument;
-			LssList = new LssContainer(txtLssFileName.Text, new LssContainer.UpdateProgress(LssLoadWorker.ReportProgress));
+			//			LssContainer lss = (LssContainer)arg.Argument;
+			if (UpdateProgressBar != null)
+			{
+				LssList = new LssContainer(txtLssFileName.Text, new LssContainer.UpdateProgress(LssLoadWorker.ReportProgress));
+			}
+			else
+			{
+				LssList = new LssContainer(txtLssFileName.Text);
+			}
 		}
 
-		public void UpdateProgressBar(object obj, ProgressChangedEventArgs arg)
-		{
-			pbLssLoadRate.Value = arg.ProgressPercentage;
-		}
 		public void AddLssComponentsComplete(object obj, RunWorkerCompletedEventArgs arg)
 		{
 			//dgvLssList.DataSource = null;
 			//dgvLssList.DataSource = LssList.ElementList;
-			pbLssLoadRate.Visible = false;
 			MessageBox.Show("Load Lss File Completed!");
 		}
 		private void btnLoadLssFile_Click(object sender, EventArgs e)
@@ -85,15 +93,21 @@ namespace ArmAssembly
 
 			if (dialog.ShowDialog() == DialogResult.OK)
 			{
-				pbLssLoadRate.Visible = true;
 				txtLssFileName.Text = dialog.FileName;
 				LssLoadWorker.RunWorkerAsync(LssList);
 			}
 		}
 		private void AddMapComponents(object obj, DoWorkEventArgs arg)
 		{
-//			MapContainer lss = (MapContainer)arg.Argument;
-			MapList = new MapContainer(txtMapFileName.Text, new MapContainer.UpdateProgress(MapLoadWorker.ReportProgress));
+			//			MapContainer lss = (MapContainer)arg.Argument;
+			if (UpdateProgressBar != null)
+			{
+				MapList = new MapContainer(txtMapFileName.Text, new MapContainer.UpdateProgress(MapLoadWorker.ReportProgress));
+			}
+			else
+			{
+				MapList = new MapContainer(txtMapFileName.Text);
+			}
 		}
 		public void AddMapComponentsComplete(object obj, RunWorkerCompletedEventArgs arg)
 		{
@@ -102,7 +116,6 @@ namespace ArmAssembly
 			dgvMapList.DataSource = null;
 			dgvMapList.DataSource = MapBindingSource;
 			dgvMapList.AutoGenerateColumns = true;
-			pbLssLoadRate.Visible = false;
 			btnLoadLssFile.Enabled = true;
 			MessageBox.Show("Load Map File Completed!");
 		}
@@ -114,7 +127,6 @@ namespace ArmAssembly
 
 			if (dialog.ShowDialog() == DialogResult.OK)
 			{
-				pbLssLoadRate.Visible = true;
 				txtMapFileName.Text = dialog.FileName;
 				MapLoadWorker.RunWorkerAsync(MapList);
 			}
@@ -251,10 +263,12 @@ namespace ArmAssembly
 				MapBindingSource.Filter = filter;
 				dgvMapList.DataSource = null;
 				dgvMapList.DataSource = MapBindingSource;
+				dgvMapList.BackgroundColor = SystemColors.ControlLightLight;
 				return true;
 			}
 			catch
 			{
+				dgvMapList.BackgroundColor = Color.Pink;
 				return false;
 			}
 		}

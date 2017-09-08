@@ -47,7 +47,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(567, 384);
 			this.Controls.Add(this.tabSymbolAsm);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
 			this.Name = "ViewSymbolAsm";
 			this.ShowIcon = false;
 			this.Text = "ViewSymbolAsm";

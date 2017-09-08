@@ -35,7 +35,14 @@
 			this.analyzeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.tsmiAnalyzeRun = new System.Windows.Forms.ToolStripMenuItem();
 			this.tsmiNext = new System.Windows.Forms.ToolStripMenuItem();
+			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
 			this.msMenu.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+			this.splitContainer1.Panel2.SuspendLayout();
+			this.splitContainer1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
+			this.splitContainer2.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// msMenu
@@ -87,7 +94,7 @@
 			this.tsmiAnalyzeRun.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
 			this.tsmiAnalyzeRun.Name = "tsmiAnalyzeRun";
 			this.tsmiAnalyzeRun.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-			this.tsmiAnalyzeRun.Size = new System.Drawing.Size(181, 26);
+			this.tsmiAnalyzeRun.Size = new System.Drawing.Size(170, 26);
 			this.tsmiAnalyzeRun.Text = "Run";
 			this.tsmiAnalyzeRun.Click += new System.EventHandler(this.tsmiAnalyzeRun_Click);
 			// 
@@ -96,15 +103,39 @@
 			this.tsmiNext.Enabled = false;
 			this.tsmiNext.Name = "tsmiNext";
 			this.tsmiNext.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-			this.tsmiNext.Size = new System.Drawing.Size(181, 26);
+			this.tsmiNext.Size = new System.Drawing.Size(170, 26);
 			this.tsmiNext.Text = "Next";
 			this.tsmiNext.Click += new System.EventHandler(this.tsmiNext_Click);
+			// 
+			// splitContainer1
+			// 
+			this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.splitContainer1.Location = new System.Drawing.Point(0, 28);
+			this.splitContainer1.Name = "splitContainer1";
+			// 
+			// splitContainer1.Panel2
+			// 
+			this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
+			this.splitContainer1.Size = new System.Drawing.Size(546, 350);
+			this.splitContainer1.SplitterDistance = 121;
+			this.splitContainer1.TabIndex = 3;
+			// 
+			// splitContainer2
+			// 
+			this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.splitContainer2.Location = new System.Drawing.Point(0, 0);
+			this.splitContainer2.Name = "splitContainer2";
+			this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
+			this.splitContainer2.Size = new System.Drawing.Size(421, 350);
+			this.splitContainer2.SplitterDistance = 140;
+			this.splitContainer2.TabIndex = 0;
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(546, 378);
+			this.Controls.Add(this.splitContainer1);
 			this.Controls.Add(this.msMenu);
 			this.IsMdiContainer = true;
 			this.MainMenuStrip = this.msMenu;
@@ -113,6 +144,11 @@
 			this.Load += new System.EventHandler(this.Form1_Load);
 			this.msMenu.ResumeLayout(false);
 			this.msMenu.PerformLayout();
+			this.splitContainer1.Panel2.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+			this.splitContainer1.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
+			this.splitContainer2.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -127,6 +163,8 @@
 		private System.Windows.Forms.ToolStripMenuItem analyzeToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem tsmiAnalyzeRun;
 		private System.Windows.Forms.ToolStripMenuItem tsmiNext;
+		private System.Windows.Forms.SplitContainer splitContainer1;
+		private System.Windows.Forms.SplitContainer splitContainer2;
 	}
 }
 
