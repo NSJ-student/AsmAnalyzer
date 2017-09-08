@@ -23,6 +23,7 @@ namespace ArmAssembly
 		{
 			TabPage newtab  = new TabPage();
 			tabSymbolAsm.Controls.Add(newtab);
+			tabSymbolAsm.SelectedTab = newtab;
 			
 			AsmDataGridView control = new AsmDataGridView(newtab, Source, StartIndex, EndIndex);
 			ControlList.Add(control);
@@ -69,6 +70,8 @@ namespace ArmAssembly
 				return false;
 
 			data.Rows[data.SelectedRows[0].Index + 1].Selected = true;
+			data.CurrentCell = data.SelectedRows[0].Cells[0];
+
 			return true;
 		}
 		public object[] GetCurrentRow()

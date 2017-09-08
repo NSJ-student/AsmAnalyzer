@@ -69,6 +69,7 @@
 			this.Name = "SelectColums";
 			this.ShowIcon = false;
 			this.Text = "SelectColums";
+			this.TopMost = true;
 			this.ResumeLayout(false);
 
 		}

@@ -238,6 +238,7 @@
 			this.Name = "FindRows";
 			this.ShowIcon = false;
 			this.Text = "FindRows";
+			this.TopMost = true;
 			this.tabFind.ResumeLayout(false);
 			this.tpFind.ResumeLayout(false);
 			this.tableLayoutPanel1.ResumeLayout(false);

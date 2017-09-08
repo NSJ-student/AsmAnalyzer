@@ -117,7 +117,7 @@
 			// 
 			this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
 			this.splitContainer1.Size = new System.Drawing.Size(546, 350);
-			this.splitContainer1.SplitterDistance = 121;
+			this.splitContainer1.SplitterDistance = 212;
 			this.splitContainer1.TabIndex = 3;
 			// 
 			// splitContainer2
@@ -126,7 +126,7 @@
 			this.splitContainer2.Location = new System.Drawing.Point(0, 0);
 			this.splitContainer2.Name = "splitContainer2";
 			this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
-			this.splitContainer2.Size = new System.Drawing.Size(421, 350);
+			this.splitContainer2.Size = new System.Drawing.Size(330, 350);
 			this.splitContainer2.SplitterDistance = 140;
 			this.splitContainer2.TabIndex = 0;
 			// 
