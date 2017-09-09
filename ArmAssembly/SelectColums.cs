@@ -12,9 +12,29 @@ namespace ArmAssembly
 {
 	public partial class SelectColums : Form
 	{
+		public static SelectColums Instance;
 		DataGridView refGrid;
 
-		public SelectColums(DataGridView grid)
+		public static SelectColums CreateSelectColums(DataGridView grid)
+		{
+			if (Instance == null)
+			{
+				Instance = new SelectColums(grid);
+				return Instance;
+			}
+			else
+			{
+				if (!Instance.Visible)
+				{
+					Instance.Dispose();
+					Instance = new SelectColums(grid);
+					return Instance;
+				}
+				else
+					return null;
+			}
+		}
+		private SelectColums(DataGridView grid)
 		{
 			InitializeComponent();
 
@@ -47,7 +67,16 @@ namespace ArmAssembly
 				}
 			}
 
-			Close();
+			Instance = null;
+			//Close();
+			Dispose();
+		}
+
+		private void SelectColums_FormClosed(object sender, FormClosedEventArgs e)
+		{
+			Instance = null;
+			//Close();
+			Dispose();
 		}
 	}
 }

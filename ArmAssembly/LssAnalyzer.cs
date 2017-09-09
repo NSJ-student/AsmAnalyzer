@@ -248,13 +248,15 @@ namespace ArmAssembly
 		}
 		private void dgvMapList_SelectColumn(object sender, EventArgs e)
 		{
-			SelectColums select = new SelectColums(dgvMapList);
-			select.Show();
+			SelectColums select = SelectColums.CreateSelectColums(dgvMapList);
+			if ((select != null) && (!select.Visible))
+				select.Show();
 		}
 		private void dgvMapList_FindRow(object sender, EventArgs e)
 		{
-			FindRows find = new FindRows(new FindRows.AdjustFilter(dgvMapList_Filter), dgvMapList);
-			find.Show();
+			FindRows find = FindRows.CreateFindRows(new FindRows.AdjustFilter(dgvMapList_Filter), dgvMapList);
+			if ((find != null) && (!find.Visible))
+				find.Show();
 		}
 		private bool dgvMapList_Filter(string filter)
 		{

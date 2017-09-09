@@ -237,8 +237,10 @@
 			this.MinimizeBox = false;
 			this.Name = "FindRows";
 			this.ShowIcon = false;
+			this.ShowInTaskbar = false;
 			this.Text = "FindRows";
 			this.TopMost = true;
+			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FindRows_FormClosed);
 			this.tabFind.ResumeLayout(false);
 			this.tpFind.ResumeLayout(false);
 			this.tableLayoutPanel1.ResumeLayout(false);

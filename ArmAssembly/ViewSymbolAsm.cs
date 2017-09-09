@@ -122,6 +122,12 @@ namespace ArmAssembly
 			Hide();
 		}
 
+		/// <summary>
+		/// mouse click event on tab
+		///    show menu - close tab
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void tabSymbolAsm_MouseClick(object sender, MouseEventArgs e)
 		{
 			if (e.Button == MouseButtons.Right)
@@ -294,13 +300,15 @@ namespace ArmAssembly
 		}
 		private void dgvMapList_SelectColumn(object sender, EventArgs e)
 		{
-			SelectColums select = new SelectColums(ldgvData);
-			select.Show();
+			SelectColums select = SelectColums.CreateSelectColums(ldgvData);
+			if ((select != null) && (!select.Visible))
+				select.Show();
 		}
 		private void dgvMapList_FindRow(object sender, EventArgs e)
 		{
-			FindRows find = new FindRows(new FindRows.AdjustFilter(dgvMapList_Filter), ldgvData);
-			find.Show();
+			FindRows find = FindRows.CreateFindRows(new FindRows.AdjustFilter(dgvMapList_Filter), ldgvData);
+			if ((find != null) && (!find.Visible))
+				find.Show();
 		}
 		private bool dgvMapList_Filter(string filter)
 		{

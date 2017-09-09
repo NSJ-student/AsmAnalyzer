@@ -12,10 +12,31 @@ namespace ArmAssembly
 {
 	public partial class FindRows : Form
 	{
+		public static FindRows Instance;
 		public delegate bool AdjustFilter(string Filter);
 		AdjustFilter Filter;
 
-		public FindRows(AdjustFilter FilterFunction, DataGridView refGrid)
+		public static FindRows CreateFindRows(AdjustFilter FilterFunction, DataGridView refGrid)
+		{
+			if(Instance == null)
+			{
+				Instance = new FindRows(FilterFunction, refGrid);
+				return Instance;
+			}
+			else
+			{
+				if (!Instance.Visible)
+				{ 
+					Instance.Dispose();
+					Instance = new FindRows(FilterFunction, refGrid);
+					return Instance;
+				}
+				else
+					return null;
+			}
+		}
+
+		private FindRows(AdjustFilter FilterFunction, DataGridView refGrid)
 		{
 			InitializeComponent();
 
@@ -27,6 +48,7 @@ namespace ArmAssembly
 				cbCmpSrc.Items.Add(item.Name);
 			}
 			cbCmpSrc.Text = (string)cbCmpSrc.Items[0];
+			cbOperator.Text = (string)cbOperator.Items[0];
 		}
 
 		private void btnFindOK_Click(object sender, EventArgs e)
@@ -49,7 +71,9 @@ namespace ArmAssembly
 			else
 				txtMapFilter.BackColor = Color.Pink;
 
-			Close();
+			Instance = null;
+			//Close();
+			Dispose();
 		}
 
 		private void btnStringFind_Click(object sender, EventArgs e)
@@ -59,7 +83,9 @@ namespace ArmAssembly
 			else
 				txtMapFilter.BackColor = Color.Pink;
 
-			Close();
+			Instance = null;
+			//Close();
+			Dispose();
 		}
 
 		private void cbType_SelectedIndexChanged(object sender, EventArgs e)
@@ -74,7 +100,16 @@ namespace ArmAssembly
 			else
 				txtMapFilter.BackColor = Color.Pink;
 
-			Close();
+			Instance = null;
+			//Close();
+			Dispose();
+		}
+
+		private void FindRows_FormClosed(object sender, FormClosedEventArgs e)
+		{
+			Instance = null;
+			//Close();
+			Dispose();
 		}
 	}
 }

@@ -68,8 +68,10 @@
 			this.MinimizeBox = false;
 			this.Name = "SelectColums";
 			this.ShowIcon = false;
+			this.ShowInTaskbar = false;
 			this.Text = "SelectColums";
 			this.TopMost = true;
+			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SelectColums_FormClosed);
 			this.ResumeLayout(false);
 
 		}
