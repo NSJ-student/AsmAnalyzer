@@ -19,6 +19,13 @@ namespace ArmAssembly
 			ControlList = new List<AsmDataGridView>();
 		}
 
+		/// <summary>
+		/// 입력된 lss정보로 새로운 탭을 만들어 추가
+		/// </summary>
+		/// <param name="Source"></param>
+		/// <param name="StartIndex"></param>
+		/// <param name="EndIndex"></param>
+		/// <returns></returns>
 		public int AddAsmTab(LssContainer Source, int StartIndex, int EndIndex)
 		{
 			TabPage newtab  = new TabPage();
@@ -32,7 +39,10 @@ namespace ArmAssembly
 
 			return 0;
 		}
-
+		/// <summary>
+		/// 현재 선택된 탭의 심볼 이름을 반환
+		/// </summary>
+		/// <returns></returns>
 		public string GetCurrnetSymbol()
 		{
 			if(tabSymbolAsm.SelectedTab != null)
@@ -44,6 +54,10 @@ namespace ArmAssembly
 				return null;
 			}
 		}
+		/// <summary>
+		/// 테이블 가장 첫번째 행을 선택
+		/// </summary>
+		/// <returns></returns>
 		public bool ResetPointer()
 		{
 			DataGridView data;
@@ -62,6 +76,10 @@ namespace ArmAssembly
 			data.Rows[0].Selected = true;
 			return true;
 		}
+		/// <summary>
+		/// 다음 행으로 이동
+		/// </summary>
+		/// <returns></returns>
 		public bool ToNextRow()
 		{
 			DataGridView data = ControlList.Find(x => x.Tab.Equals(tabSymbolAsm.SelectedTab)).GridViewControl;
@@ -74,6 +92,10 @@ namespace ArmAssembly
 
 			return true;
 		}
+		/// <summary>
+		/// 현재 선택된 행의 데이터를 object[]로 반환
+		/// </summary>
+		/// <returns></returns>
 		public object[] GetCurrentRow()
 		{
 			DataGridView data = ControlList.Find(x => x.Tab.Equals(tabSymbolAsm.SelectedTab)).GridViewControl;
@@ -81,6 +103,11 @@ namespace ArmAssembly
 			return view.Row.ItemArray;
 		}
 
+		/// <summary>
+		/// Symbol과 일치하는 탭이 존재하는지 확인
+		/// </summary>
+		/// <param name="Symbol"></param>
+		/// <returns></returns>
 		public bool IsTableExist(string Symbol)
 		{
 			try
@@ -97,6 +124,11 @@ namespace ArmAssembly
 			}
 		}
 
+		/// <summary>
+		/// 폼이 닫힐 때 destroy가 아니라 hide로
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void ViewSymbolAsm_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			e.Cancel = true;
@@ -104,8 +136,7 @@ namespace ArmAssembly
 		}
 
 		/// <summary>
-		/// mouse click event on tab
-		///    show menu - close tab
+		/// 생성된 탭을 닫기 위한 우클릭 메뉴 생성 및 동작
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="e"></param>

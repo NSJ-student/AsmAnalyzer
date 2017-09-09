@@ -42,6 +42,10 @@ namespace ArmAssembly
 			this.Text += " - " + SymbolName;
 		}
 
+		/// <summary>
+		/// ViewSymbolAsm에서 선택한 행의 어셈블리를 번역하여 레지스터 등에 적용하는 동작을 현 UI에 적용
+		/// </summary>
+		/// <param name="input"></param>
 		public void SetInput(object[] input)
 		{
 			if(input[1].Equals("assembly"))
@@ -100,6 +104,11 @@ namespace ArmAssembly
 
 		}
 
+		/// <summary>
+		/// 레지스터 출력값 16진수/10진수 변환 버튼 이벤트
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void ChangeRegisterFormat(object sender, EventArgs e)
 		{
 			Button ClickedButton = (Button)sender;
@@ -167,6 +176,11 @@ namespace ArmAssembly
 			}
 		}
 
+		/// <summary>
+		/// 레지스터 값을 클리어
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void pbRegClear_Click(object sender, EventArgs e)
 		{
 			foreach(RegisterControl item in RegArray)
