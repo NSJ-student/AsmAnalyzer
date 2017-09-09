@@ -53,6 +53,11 @@ namespace ArmAssembly
 			}
 		}
 
+		/// <summary>
+		/// 출력할 헤더 설정을 적용
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void btnSelect_Click(object sender, EventArgs e)
 		{
 			for (int index = 0; index < clbShowList.Items.Count; index++)
@@ -72,6 +77,11 @@ namespace ArmAssembly
 			Dispose();
 		}
 
+		/// <summary>
+		/// 창을 닫을 때 모든 자원 정리
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void SelectColums_FormClosed(object sender, FormClosedEventArgs e)
 		{
 			Instance = null;
