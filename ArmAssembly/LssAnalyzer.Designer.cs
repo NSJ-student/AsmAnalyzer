@@ -81,8 +81,8 @@
 			this.dgvMapList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dgvMapList.Size = new System.Drawing.Size(775, 377);
 			this.dgvMapList.TabIndex = 3;
-			this.dgvMapList.DoubleClick += new System.EventHandler(this.dgvMapList_DoubleClick);
 			this.dgvMapList.MouseClick += new System.Windows.Forms.MouseEventHandler(this.dgvMapList_MouseClick);
+			this.dgvMapList.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.dgvMapList_MouseDoubleClick);
 			// 
 			// tableLayoutPanel1
 			// 

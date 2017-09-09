@@ -161,78 +161,6 @@ namespace ArmAssembly
 			}
 		}
 		
-		private void dgvMapList_DoubleClick(object sender, EventArgs e)
-		{
-			if (dgvMapList.SelectedRows.Count == 0)
-			{
-				MessageBox.Show("No Symbol Selected!");
-				return;
-			}
-			DataGridViewSelectedRowCollection test = dgvMapList.SelectedRows;
-			string[] symbols = new string[test.Count];
-			int index = 0;
-
-			foreach (DataGridViewRow item in test)
-			{
-				string ItemSymbol;
-				string ItemAddress;
-				try
-				{
-					DataRowView view = (DataRowView)item.DataBoundItem;
-					ItemSymbol = (string)view.Row.ItemArray[2];
-					ItemAddress = (string)view.Row.ItemArray[3];
-				}
-				catch
-				{
-					MapElements element = (MapElements)item.DataBoundItem;
-					ItemSymbol = element.Symbol;
-					ItemAddress = element.Address;
-				}
-
-				if (Convert.ToInt32(ItemAddress, 16) == 0)
-				{
-					return;
-				}
-
-				if (IsSymbolExist(ItemSymbol) == true)
-				{
-					MessageBox.Show("<" + ItemSymbol + "> Already Exists!");
-					return;
-				}
-				symbols[index] = ItemSymbol;
-
-				try
-				{
-					int SymbolIndex = LssList.SymbolList.FindIndex(x => x.Memory.Equals(ItemAddress, StringComparison.OrdinalIgnoreCase));
-					if(SymbolIndex < 0)
-					{
-						throw new NullReferenceException();
-					}
-					int StartIndex, EndIndex;
-					StartIndex = LssList.ElementList.FindIndex(x =>
-							!string.IsNullOrEmpty(x.Memory) && x.Memory.Equals(LssList.SymbolList[SymbolIndex].Memory, StringComparison.OrdinalIgnoreCase));
-					if (SymbolIndex != LssList.SymbolList.Count - 1)
-					{
-						EndIndex = LssList.ElementList.FindIndex(x =>
-							!string.IsNullOrEmpty(x.Memory) && x.Memory.Equals(LssList.SymbolList[SymbolIndex + 1].Memory, StringComparison.OrdinalIgnoreCase));
-					}
-					else
-					{
-						EndIndex = LssList.ElementList.Count;
-					}
-					
-					AddSymbol?.Invoke(LssList, StartIndex, EndIndex);
-				}
-				catch (NullReferenceException arg)
-				{
-					MessageBox.Show("No Reference!");
-					return;
-				}
-
-				index++;
-			}
-		}
-		
 		private void LssAnalyzer_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			e.Cancel = true;
@@ -304,5 +232,84 @@ namespace ArmAssembly
 			}
 		}
 
+		/// <summary>
+		/// 더블클릭한 항목의 lss를 불러온다
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void dgvMapList_MouseDoubleClick(object sender, MouseEventArgs e)
+		{
+			if(dgvMapList.HitTest(e.X, e.Y).RowIndex >= 0)
+			{
+				if (dgvMapList.SelectedRows.Count == 0)
+				{
+					MessageBox.Show("No Symbol Selected!");
+					return;
+				}
+				DataGridViewSelectedRowCollection test = dgvMapList.SelectedRows;
+				string[] symbols = new string[test.Count];
+				int index = 0;
+
+				foreach (DataGridViewRow item in test)
+				{
+					string ItemSymbol;
+					string ItemAddress;
+					try
+					{
+						DataRowView view = (DataRowView)item.DataBoundItem;
+						ItemSymbol = (string)view.Row.ItemArray[2];
+						ItemAddress = (string)view.Row.ItemArray[3];
+					}
+					catch
+					{
+						MapElements element = (MapElements)item.DataBoundItem;
+						ItemSymbol = element.Symbol;
+						ItemAddress = element.Address;
+					}
+
+					if (Convert.ToInt32(ItemAddress, 16) == 0)
+					{
+						return;
+					}
+
+					if (IsSymbolExist(ItemSymbol) == true)
+					{
+						MessageBox.Show("<" + ItemSymbol + "> Already Exists!");
+						return;
+					}
+					symbols[index] = ItemSymbol;
+
+					try
+					{
+						int SymbolIndex = LssList.SymbolList.FindIndex(x => x.Memory.Equals(ItemAddress, StringComparison.OrdinalIgnoreCase));
+						if (SymbolIndex < 0)
+						{
+							throw new NullReferenceException();
+						}
+						int StartIndex, EndIndex;
+						StartIndex = LssList.ElementList.FindIndex(x =>
+								!string.IsNullOrEmpty(x.Memory) && x.Memory.Equals(LssList.SymbolList[SymbolIndex].Memory, StringComparison.OrdinalIgnoreCase));
+						if (SymbolIndex != LssList.SymbolList.Count - 1)
+						{
+							EndIndex = LssList.ElementList.FindIndex(x =>
+								!string.IsNullOrEmpty(x.Memory) && x.Memory.Equals(LssList.SymbolList[SymbolIndex + 1].Memory, StringComparison.OrdinalIgnoreCase));
+						}
+						else
+						{
+							EndIndex = LssList.ElementList.Count;
+						}
+
+						AddSymbol?.Invoke(LssList, StartIndex, EndIndex);
+					}
+					catch (NullReferenceException arg)
+					{
+						MessageBox.Show("No Reference!");
+						return;
+					}
+
+					index++;
+				}
+			}
+		}
 	}
 }
