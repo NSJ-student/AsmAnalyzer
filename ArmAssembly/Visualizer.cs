@@ -106,31 +106,63 @@ namespace ArmAssembly
 
 			if(ClickedButton.Equals(btnFormatAll))
 			{
-				String SetStr;
+				string SetStr;
+				int fromNum;
+				string toNum;
 
 				if (ClickedButton.Text.Equals("HEX"))
 				{
 					SetStr = "DEC";
+					fromNum = 16;
+					toNum = "";
 				}
 				else
 				{
 					SetStr = "HEX";
+					fromNum = 10;
+					toNum = "X";
 				}
 
-				for (int cnt=0; cnt<17; cnt++)
+				for (int cnt = 0; cnt < 17; cnt++)
 				{
+					if ((RegArray[cnt].txtValue != null)&&(RegArray[cnt].txtValue.Text.Length > 0))
+					{
+						string orgStr = RegArray[cnt].txtValue.Text;
+						uint orgValue = Convert.ToUInt32(orgStr, fromNum);
+						RegArray[cnt].txtValue.Text = orgValue.ToString(toNum);
+					}
 					RegArray[cnt].btnFormat.Text = SetStr;
 				}
 			}
 			else
 			{
+				string SetStr;
+				int fromNum;
+				string toNum;
+
 				if (ClickedButton.Text.Equals("HEX"))
 				{
-					ClickedButton.Text = "DEC";
+					SetStr = "DEC";
+					fromNum = 16;
+					toNum = "";
 				}
 				else
 				{
-					ClickedButton.Text = "HEX";
+					SetStr = "HEX";
+					fromNum = 10;
+					toNum = "X";
+				}
+
+				ClickedButton.Text = SetStr;
+				for (int cnt = 0; cnt < 16; cnt++)
+				{
+					if (RegArray[cnt].btnFormat.Equals(ClickedButton))
+					{
+						string orgStr = RegArray[cnt].txtValue.Text;
+						uint orgValue = Convert.ToUInt32(orgStr, fromNum);
+						RegArray[cnt].txtValue.Text = orgValue.ToString(toNum);
+						break;
+					}
 				}
 			}
 		}

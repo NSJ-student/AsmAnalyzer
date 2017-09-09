@@ -40,6 +40,35 @@ namespace ArmAssembly
 			}
 		}
 
+		// Source[10]
+		// 0 index
+		// 1 area
+		// 2 memory
+		// 3 symbol
+		// 4 hexinst
+		// 5 asciiinst
+		// 6 param
+		// 7 comment
+		// 8 allstring
+		// 9 element type
+		public object[] GetMemoryRow(string memory)
+		{
+			LssElements data = LssList.ElementList.Find(x => (x.Memory != null) && (x.Memory.Equals(memory)));
+
+			if (data != null)
+			{
+				object[] retValue = new object[10];
+				retValue[0] = data.Index; retValue[1] = data.Area;
+				retValue[2] = data.Memory; retValue[3] = data.Symbol;
+				retValue[4] = data.HexInstruction; retValue[5] = data.Instruction;
+				retValue[6] = data.Parameter; retValue[7] = data.CommentValue;
+				retValue[8] = data.StringLine; retValue[9] = data.ElementType;
+				return retValue;
+			}
+			else
+				return null;
+		}
+
 		public LssAnalyzer(ProgressBarUpdate progress = null)
 		{
 			InitializeComponent();

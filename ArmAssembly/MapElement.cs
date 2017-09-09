@@ -21,50 +21,57 @@ namespace ArmAssembly
 		{
 			ElementList = new List<MapElements>();
 			AllStrings = File.ReadAllLines(FileName);
-			int cnt = 0;
+			int mainCnt = 0;
 
-			for (; cnt < AllStrings.Length; cnt++)
+			// Memory Configuration 영역 이전의 문자열 모두 무시
+			for (; mainCnt < AllStrings.Length; mainCnt++)
 			{
-				string str = AllStrings[cnt];
+				string str = AllStrings[mainCnt];
 				if (str.Equals("Memory Configuration"))
 				{
 					break;
 				}
 			}
-			for (; cnt < AllStrings.Length; cnt++)
+			for (; mainCnt < AllStrings.Length; mainCnt++)
 			{
-				string str = AllStrings[cnt];
+				string str = AllStrings[mainCnt];
+				// 공백이 아닌 행을 만날 때만 처리
 				if (!str.Replace(" ", string.Empty).Equals(""))
 				{
+					// 현재 문자열이 메모리 위치 정보를 가지고 있을 때만 처리
 					if (MapElements.StringSortMapType(str) != MapElements.MapType.SYM_NONE)
 					{
-						int itemcnt = 0;
-						string strLoop = AllStrings[cnt + 1];
+						int subCnt = 0;
+						// 다음 문자 선택
+						string strLoop = AllStrings[mainCnt + 1];
+						// 메모리 위치 정보를 가진 문자열이 나올 때까지 루프 (subCnt로 문자열 참조)
 						while (ArmAssembly.MapElements.StringSortMapType(strLoop) == ArmAssembly.MapElements.MapType.SYM_NONE)
 						{
-							itemcnt++;
-							if (cnt + 1 + itemcnt == AllStrings.Length)
+							subCnt++;
+							if (mainCnt + 1 + subCnt == AllStrings.Length)		// 문자열 전체를 다 돌았으면 루프를 빠져나감
 								break;
-							if (!AllStrings[cnt + 1 + itemcnt].Equals(""))
+							if (!AllStrings[mainCnt + 1 + subCnt].Equals(""))	// 공백이 아닌 행을 다음 while비교문 문자열로 설정
 							{
-								strLoop = AllStrings[cnt + 1 + itemcnt];
+								strLoop = AllStrings[mainCnt + 1 + subCnt];
 							}
 						}
-						if (itemcnt != 0)
+						// 문자열 전체를 다 돌아서 루프를 마친게 아니면 심볼을 추출하기 위한 처리 시작
+						if (subCnt != 0)
 						{
-							string[] arg = new string[itemcnt + 1];
-							int target_cnt = cnt + 1 + itemcnt;
-							for (int loop = 0; cnt < target_cnt; cnt++)
+							string[] arg = new string[subCnt + 1];
+							int target_cnt = mainCnt + 1 + subCnt;
+							// 위 루프에서 확인한 개수의 문자열을 arg에 저장
+							for (int argCnt = 0; mainCnt < target_cnt; mainCnt++)
 							{
-								if (!AllStrings[cnt].Equals(""))
+								if (!AllStrings[mainCnt].Equals(""))
 								{
-									arg[loop] = AllStrings[cnt];
-									loop++;
+									arg[argCnt] = AllStrings[mainCnt];
+									argCnt++;
 								}
 							}
 							MapElements element = new MapElements(arg);
 							ElementList.Add(element);
-							cnt--;
+							mainCnt--;
 						}
 					}
 				}
@@ -215,8 +222,9 @@ namespace ArmAssembly
 		{
 			refCount++;
 			IndexNum = refCount;
-			// .(type).(symbolname)
+			// .(type).(symbolname)으로 시작하는 첫번째 문자열 => 최소 메모리 영역에 대한 정보를 가지고 있음
 			string[] split1 = input[0].Split(new char[] { "       ".ToCharArray()[0], "                ".ToCharArray()[0] }, StringSplitOptions.RemoveEmptyEntries);
+			// 메모리 영역과 심볼을 분리
 			string[] split2 = split1[0].Split(new char[] { ".".ToCharArray()[0] }, StringSplitOptions.RemoveEmptyEntries);
 			Type = SortMapType(split2[0]);
 			if(split2.Length > 1)
@@ -228,6 +236,7 @@ namespace ArmAssembly
 				SymbolName = "";
 			}
 			
+			// 첫번째 문자열에 memory area와 symbol 정보만 있는 경우
 			if (split1.Length == 1)
 			{
 				string[] temp = input[1].Split(new char[] { "       ".ToCharArray()[0], "                ".ToCharArray()[0] }, StringSplitOptions.RemoveEmptyEntries);
@@ -241,12 +250,19 @@ namespace ArmAssembly
 					if (cnt >= temp.Length-2) break;
 					FileLocation += " ";
 				}
+				if(SymbolName.Equals("") && (input.Length > 2))
+				{
+					string[] temp2 = input[2].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+					if (!temp2[0].Equals("*fill*"))
+						SymbolName = temp2[temp2.Length - 1];
+				}
 			}
+			// 첫번째 문자열에 memory area와 symbol 외 size, path 저오도 있는 경우
 			else if (split1.Length >= 3)
 			{
 				MemAddr = Convert.ToUInt32(split1[1].Remove(0, 2), 16);
 				MemSize = Convert.ToUInt32(split1[2].Remove(0, 2), 16);
-				if(split1.Length == 4)
+				if(split1.Length >= 4)
 				{
 					int cnt = 0;
 					while (true)
@@ -255,6 +271,12 @@ namespace ArmAssembly
 						cnt++;
 						if (cnt >= split1.Length - 3) break;
 						FileLocation += " ";
+					}
+					if (SymbolName.Equals("") && (input.Length > 1))
+					{
+						string[] temp2 = input[1].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+						if (!temp2[0].Equals("*fill*"))
+							SymbolName = temp2[temp2.Length - 1];
 					}
 				}
 			}

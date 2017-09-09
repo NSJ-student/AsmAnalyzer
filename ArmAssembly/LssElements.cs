@@ -196,9 +196,10 @@ namespace ArmAssembly
 					}
 
 					string[] split2 = split1[1].Split(new char[] { '\t' });
-					try
+					if(split2.Length >= 3)
 					{
-						hexInstruction = Convert.ToUInt32(split2[1].Replace(" ", string.Empty), 16);
+						string hexInst = split2[1].Replace(" ", string.Empty);
+						hexInstruction = Convert.ToUInt32(hexInst, 16);
 						strInstruction = split2[2].Trim();
 						if (split2.Length >= 4)
 						{
@@ -207,14 +208,13 @@ namespace ArmAssembly
 						if (strInstruction.Equals(".word"))
 						{
 							Type = LssType.WORD_DATA;
-
 						}
 						else
 						{
 							Type = LssType.ASSEM_INSTRUCTION;
 						}
 					}
-					catch
+					else
 					{
 						string middle = split2[1].Remove(split2[1].Length - 16, 16);
 						strParameter = middle.TrimEnd(); //split2[1];

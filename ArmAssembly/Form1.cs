@@ -104,7 +104,7 @@ namespace ArmAssembly
 		{
 			if (Sym.ResetPointer())
 			{
-				Vis = new Visualizer(Sym.GetCurrnetSymbol(), Sym.GetMemoryRow);
+				Vis = new Visualizer(Sym.GetCurrnetSymbol(), Analyzer.GetMemoryRow);
 				Vis.MdiParent = this;
 				splitContainer1.Panel1.Controls.Add(Vis);
 				Vis.Dock = DockStyle.Fill;

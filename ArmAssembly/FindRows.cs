@@ -111,5 +111,45 @@ namespace ArmAssembly
 			//Close();
 			Dispose();
 		}
+
+		private void txtStringFilter_KeyUp(object sender, KeyEventArgs e)
+		{
+			if(e.KeyData == Keys.Enter)
+			{
+				if (Filter(txtStringFilter.Text))
+					txtMapFilter.BackColor = Color.White;
+				else
+					txtMapFilter.BackColor = Color.Pink;
+
+				Instance = null;
+				//Close();
+				Dispose();
+			}
+		}
+
+		private void txtMapFilter_KeyUp(object sender, KeyEventArgs e)
+		{
+			string strFilter;
+
+			if (cbOperator.Text.Equals("LIKE"))
+			{
+				strFilter = "[" + (string)cbCmpSrc.SelectedItem + "]"
+							+ " LIKE '%" + txtMapFilter.Text + "%'";
+			}
+			else
+			{
+				strFilter = (string)cbCmpSrc.SelectedItem
+							+ " " + cbOperator.Text + " '" + txtMapFilter.Text + "'";
+			}
+
+			if (Filter(strFilter))
+				txtMapFilter.BackColor = Color.White;
+			else
+				txtMapFilter.BackColor = Color.Pink;
+
+			Instance = null;
+			//Close();
+			Dispose();
+		}
 	}
 }

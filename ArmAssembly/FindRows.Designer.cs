@@ -98,6 +98,7 @@
 			// cbCmpSrc
 			// 
 			this.cbCmpSrc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+			this.cbCmpSrc.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cbCmpSrc.FormattingEnabled = true;
 			this.cbCmpSrc.Location = new System.Drawing.Point(86, 4);
 			this.cbCmpSrc.Name = "cbCmpSrc";
@@ -107,7 +108,9 @@
 			// cbOperator
 			// 
 			this.cbOperator.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+			this.cbOperator.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cbOperator.FormattingEnabled = true;
+			this.cbOperator.ImeMode = System.Windows.Forms.ImeMode.NoControl;
 			this.cbOperator.Items.AddRange(new object[] {
             "LIKE",
             "=",
@@ -128,6 +131,7 @@
 			this.txtMapFilter.Name = "txtMapFilter";
 			this.txtMapFilter.Size = new System.Drawing.Size(164, 25);
 			this.txtMapFilter.TabIndex = 3;
+			this.txtMapFilter.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtMapFilter_KeyUp);
 			// 
 			// lbFilter
 			// 
@@ -213,6 +217,7 @@
 			this.txtStringFilter.Name = "txtStringFilter";
 			this.txtStringFilter.Size = new System.Drawing.Size(330, 25);
 			this.txtStringFilter.TabIndex = 1;
+			this.txtStringFilter.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtStringFilter_KeyUp);
 			// 
 			// btnStringFind
 			// 

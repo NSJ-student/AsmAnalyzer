@@ -81,25 +81,6 @@ namespace ArmAssembly
 			return view.Row.ItemArray;
 		}
 
-		public object[] GetMemoryRow(string memory)
-		{
-			object[] retValue = null;
-
-			DataGridView data = ControlList.Find(x => x.Tab.Equals(tabSymbolAsm.SelectedTab)).GridViewControl;
-			
-			foreach(DataGridViewRow item in data.Rows)
-			{
-				DataRowView view = (DataRowView)item.DataBoundItem;
-				if(view.Row.ItemArray[2].Equals(memory))
-				{
-					retValue = view.Row.ItemArray;
-					break;
-				}
-			}
-
-			return retValue;
-		}
-
 		public bool IsTableExist(string Symbol)
 		{
 			try
