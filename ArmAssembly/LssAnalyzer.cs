@@ -15,8 +15,11 @@ namespace ArmAssembly
 		public delegate void ProgressBarUpdate(object obj, ProgressChangedEventArgs arg);
 		public delegate int AddSymbolASM(LssContainer Source, int StartIndex, int EndIndex);
 		public delegate bool IsTableExists(string Symbol);
-		BackgroundWorker LssLoadWorker;
-		BackgroundWorker MapLoadWorker;
+		enum LoadType{
+			MAP_LOADER,
+			LSS_LOADER
+		};
+		BackgroundWorker LoadWorker;
 		BindingSource MapBindingSource;
 		LssContainer LssList;
 		MapContainer MapList;
@@ -40,6 +43,26 @@ namespace ArmAssembly
 			}
 		}
 
+		public LssAnalyzer(ProgressBarUpdate progress = null)
+		{
+			InitializeComponent();
+			
+			btnLoadLssFile.Enabled = false;
+
+			MapBindingSource = new BindingSource();
+
+			LoadWorker = new BackgroundWorker();
+			LoadWorker.WorkerReportsProgress = true;
+			LoadWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(MakeComponentsComplete);
+			LoadWorker.DoWork += new DoWorkEventHandler(MakeComponents);
+			
+			UpdateProgressBar = progress;
+			if (progress != null)
+			{
+				LoadWorker.ProgressChanged += new ProgressChangedEventHandler(progress);
+			}
+		}
+
 		// Source[10]
 		// 0 index
 		// 1 area
@@ -51,6 +74,12 @@ namespace ArmAssembly
 		// 7 comment
 		// 8 allstring
 		// 9 element type
+
+		/// <summary>
+		/// lss 데이터 중에서 특정 메모리관련 정보를 object[]로 리턴
+		/// </summary>
+		/// <param name="memory"></param>
+		/// <returns></returns>
 		public object[] GetMemoryRow(string memory)
 		{
 			LssElements data = LssList.ElementList.Find(x => (x.Memory != null) && (x.Memory.Equals(memory)));
@@ -69,51 +98,11 @@ namespace ArmAssembly
 				return null;
 		}
 
-		public LssAnalyzer(ProgressBarUpdate progress = null)
-		{
-			InitializeComponent();
-			
-			btnLoadLssFile.Enabled = false;
-
-			MapBindingSource = new BindingSource();
-
-			LssLoadWorker = new BackgroundWorker();
-			LssLoadWorker.WorkerReportsProgress = true;
-			LssLoadWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(AddLssComponentsComplete);
-			LssLoadWorker.DoWork += new DoWorkEventHandler(AddLssComponents);
-
-			MapLoadWorker = new BackgroundWorker();
-			MapLoadWorker.WorkerReportsProgress = true;
-			MapLoadWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(AddMapComponentsComplete);
-			MapLoadWorker.DoWork += new DoWorkEventHandler(AddMapComponents);
-
-			UpdateProgressBar = progress;
-			if (progress != null)
-			{
-				LssLoadWorker.ProgressChanged += new ProgressChangedEventHandler(progress);
-				MapLoadWorker.ProgressChanged += new ProgressChangedEventHandler(progress);
-			}
-		}
-
-		private void AddLssComponents(object obj, DoWorkEventArgs arg)
-		{
-			//			LssContainer lss = (LssContainer)arg.Argument;
-			if (UpdateProgressBar != null)
-			{
-				LssList = new LssContainer(txtLssFileName.Text, new LssContainer.UpdateProgress(LssLoadWorker.ReportProgress));
-			}
-			else
-			{
-				LssList = new LssContainer(txtLssFileName.Text);
-			}
-		}
-
-		public void AddLssComponentsComplete(object obj, RunWorkerCompletedEventArgs arg)
-		{
-			//dgvLssList.DataSource = null;
-			//dgvLssList.DataSource = LssList.ElementList;
-			MessageBox.Show("Load Lss File Completed!");
-		}
+		/// <summary>
+		/// map, lss 파일 불러오기 작업
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void btnLoadLssFile_Click(object sender, EventArgs e)
 		{
 			OpenFileDialog dialog = new OpenFileDialog();
@@ -123,30 +112,8 @@ namespace ArmAssembly
 			if (dialog.ShowDialog() == DialogResult.OK)
 			{
 				txtLssFileName.Text = dialog.FileName;
-				LssLoadWorker.RunWorkerAsync(LssList);
+				LoadWorker.RunWorkerAsync(LoadType.LSS_LOADER);
 			}
-		}
-		private void AddMapComponents(object obj, DoWorkEventArgs arg)
-		{
-			//			MapContainer lss = (MapContainer)arg.Argument;
-			if (UpdateProgressBar != null)
-			{
-				MapList = new MapContainer(txtMapFileName.Text, new MapContainer.UpdateProgress(MapLoadWorker.ReportProgress));
-			}
-			else
-			{
-				MapList = new MapContainer(txtMapFileName.Text);
-			}
-		}
-		public void AddMapComponentsComplete(object obj, RunWorkerCompletedEventArgs arg)
-		{
-			MapBindingSource.DataSource = MapList.MapDataSet;
-			MapBindingSource.DataMember = MapList.MapDataSet.Tables[0].TableName;
-			dgvMapList.DataSource = null;
-			dgvMapList.DataSource = MapBindingSource;
-			dgvMapList.AutoGenerateColumns = true;
-			btnLoadLssFile.Enabled = true;
-			MessageBox.Show("Load Map File Completed!");
 		}
 		private void btnLoadMapFile_Click(object sender, EventArgs e)
 		{
@@ -157,10 +124,51 @@ namespace ArmAssembly
 			if (dialog.ShowDialog() == DialogResult.OK)
 			{
 				txtMapFileName.Text = dialog.FileName;
-				MapLoadWorker.RunWorkerAsync(MapList);
+				LoadWorker.RunWorkerAsync(LoadType.MAP_LOADER);
 			}
 		}
-		
+		private void MakeComponents(object obj, DoWorkEventArgs arg)
+		{
+			if (UpdateProgressBar != null)
+			{
+				if ((LoadType)arg.Argument == LoadType.MAP_LOADER)
+					MapList = new MapContainer(txtMapFileName.Text, new MapContainer.UpdateProgress(LoadWorker.ReportProgress));
+				if ((LoadType)arg.Argument == LoadType.LSS_LOADER)
+					LssList = new LssContainer(txtLssFileName.Text, new LssContainer.UpdateProgress(LoadWorker.ReportProgress));
+			}
+			else
+			{
+				if ((LoadType)arg.Argument == LoadType.MAP_LOADER)
+					MapList = new MapContainer(txtMapFileName.Text);
+				if ((LoadType)arg.Argument == LoadType.LSS_LOADER)
+					LssList = new LssContainer(txtLssFileName.Text);
+			}
+			arg.Result = arg.Argument;
+		}
+		public void MakeComponentsComplete(object obj, RunWorkerCompletedEventArgs arg)
+		{
+			if ((LoadType)arg.Result == LoadType.MAP_LOADER)
+			{
+				MapBindingSource.DataSource = MapList.MapDataSet;
+				MapBindingSource.DataMember = MapList.MapDataSet.Tables[0].TableName;
+				dgvMapList.DataSource = null;
+				dgvMapList.DataSource = MapBindingSource;
+				dgvMapList.AutoGenerateColumns = true;
+				btnLoadLssFile.Enabled = true;
+				MessageBox.Show("Load Map File Completed!");
+			}
+			if ((LoadType)arg.Result == LoadType.LSS_LOADER)
+			{
+
+				MessageBox.Show("Load Lss File Completed!");
+			}
+		}
+
+		/// <summary>
+		/// 폼이 닫힐 때 destroy가 아니라 hide로
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void LssAnalyzer_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			e.Cancel = true;
@@ -243,7 +251,7 @@ namespace ArmAssembly
 			{
 				if (dgvMapList.SelectedRows.Count == 0)
 				{
-					MessageBox.Show("No Symbol Selected!");
+					MessageBox.Show("No Symbol Selected!","Error", MessageBoxButtons.OK, MessageBoxIcon.Stop, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
 					return;
 				}
 				DataGridViewSelectedRowCollection test = dgvMapList.SelectedRows;
@@ -274,7 +282,8 @@ namespace ArmAssembly
 
 					if (IsSymbolExist(ItemSymbol) == true)
 					{
-						MessageBox.Show("<" + ItemSymbol + "> Already Exists!");
+						MessageBox.Show("<" + ItemSymbol + "> Already Exists!", "Duplicate Symbol",
+							MessageBoxButtons.OK, MessageBoxIcon.Stop, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
 						return;
 					}
 					symbols[index] = ItemSymbol;
@@ -303,7 +312,8 @@ namespace ArmAssembly
 					}
 					catch (NullReferenceException arg)
 					{
-						MessageBox.Show("No Reference!");
+						MessageBox.Show("Matching Symbol doesn't exist", "No Reference!", 
+							MessageBoxButtons.OK, MessageBoxIcon.Stop, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
 						return;
 					}
 
