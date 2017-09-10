@@ -12,29 +12,18 @@ namespace ArmAssembly
 {
 	public partial class LssAnalyzer : Form
 	{
-		public delegate void ProgressBarUpdate(object obj, ProgressChangedEventArgs arg);
-		public delegate int AddSymbolASM(LssContainer Source, int StartIndex, int EndIndex);
+		public delegate void MakeSymbolTab(uint TargetAddress);
 		public delegate bool IsTableExists(string Symbol);
+		public event MakeSymbolTab DoMakeSymbolTab;
 		enum LoadType{
 			MAP_LOADER,
 			LSS_LOADER
 		};
 		BackgroundWorker LoadWorker;
 		BindingSource MapBindingSource;
-		LssContainer LssList;
-		MapContainer MapList;
-
-		ProgressBarUpdate UpdateProgressBar;
-		AddSymbolASM AddSymbol;
+		
 		IsTableExists IsSymbolExist;
-
-		public AddSymbolASM AddSymbolTable
-		{
-			set
-			{
-				AddSymbol = value;
-			}
-		}
+		
 		public IsTableExists IsTableExist
 		{
 			set
@@ -43,24 +32,16 @@ namespace ArmAssembly
 			}
 		}
 
-		public LssAnalyzer(ProgressBarUpdate progress = null)
+		public LssAnalyzer(BackgroundWorker worker, BindingSource datasrc)
 		{
 			InitializeComponent();
 			
 			btnLoadLssFile.Enabled = false;
 
-			MapBindingSource = new BindingSource();
+			MapBindingSource = datasrc;
 
-			LoadWorker = new BackgroundWorker();
-			LoadWorker.WorkerReportsProgress = true;
+			LoadWorker = worker;
 			LoadWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(MakeComponentsComplete);
-			LoadWorker.DoWork += new DoWorkEventHandler(MakeComponents);
-			
-			UpdateProgressBar = progress;
-			if (progress != null)
-			{
-				LoadWorker.ProgressChanged += new ProgressChangedEventHandler(progress);
-			}
 		}
 
 		// Source[10]
@@ -74,32 +55,7 @@ namespace ArmAssembly
 		// 7 comment
 		// 8 allstring
 		// 9 element type
-
-		/// <summary>
-		/// lss 데이터 중에서 특정 메모리관련 정보를 object[]로 리턴
-		/// </summary>
-		/// <param name="memory"></param>
-		/// <returns></returns>
-		public MemInfo GetMemoryRow(string memory)
-		{
-			uint uiMemory = Convert.ToUInt32(memory, 16);
-			MapElements mapData = MapList.ElementList.Find(x => (x.Memory <= uiMemory) && (uiMemory < (x.Memory + x.Size)));
-			LssElements lssData = LssList.ElementList.Find(x => (x.Memory == uiMemory));
-
-			if (lssData != null)
-			{
-				MemInfo retValue = new MemInfo(lssData.Memory.ToString("X"), lssData.Symbol, lssData.Parameter, mapData.Area);
-				return retValue;
-			}
-			else if(mapData != null)
-			{
-				MemInfo retValue = new MemInfo(mapData.Memory.ToString("X"), mapData.Symbol, "0", mapData.Area);
-				return retValue;
-			}
-			else
-				return null;
-		}
-
+		
 		/// <summary>
 		/// map, lss 파일 불러오기 작업
 		/// </summary>
@@ -114,7 +70,7 @@ namespace ArmAssembly
 			if (dialog.ShowDialog() == DialogResult.OK)
 			{
 				txtLssFileName.Text = dialog.FileName;
-				LoadWorker.RunWorkerAsync(LoadType.LSS_LOADER);
+				LoadWorker.RunWorkerAsync(dialog.FileName);
 			}
 		}
 		private void btnLoadMapFile_Click(object sender, EventArgs e)
@@ -126,33 +82,13 @@ namespace ArmAssembly
 			if (dialog.ShowDialog() == DialogResult.OK)
 			{
 				txtMapFileName.Text = dialog.FileName;
-				LoadWorker.RunWorkerAsync(LoadType.MAP_LOADER);
+				LoadWorker.RunWorkerAsync(dialog.FileName);
 			}
-		}
-		private void MakeComponents(object obj, DoWorkEventArgs arg)
-		{
-			if (UpdateProgressBar != null)
-			{
-				if ((LoadType)arg.Argument == LoadType.MAP_LOADER)
-					MapList = new MapContainer(txtMapFileName.Text, new MapContainer.UpdateProgress(LoadWorker.ReportProgress));
-				if ((LoadType)arg.Argument == LoadType.LSS_LOADER)
-					LssList = new LssContainer(txtLssFileName.Text, new LssContainer.UpdateProgress(LoadWorker.ReportProgress));
-			}
-			else
-			{
-				if ((LoadType)arg.Argument == LoadType.MAP_LOADER)
-					MapList = new MapContainer(txtMapFileName.Text);
-				if ((LoadType)arg.Argument == LoadType.LSS_LOADER)
-					LssList = new LssContainer(txtLssFileName.Text);
-			}
-			arg.Result = arg.Argument;
 		}
 		public void MakeComponentsComplete(object obj, RunWorkerCompletedEventArgs arg)
 		{
 			if ((LoadType)arg.Result == LoadType.MAP_LOADER)
 			{
-				MapBindingSource.DataSource = MapList.MapDataSet;
-				MapBindingSource.DataMember = MapList.MapDataSet.Tables[0].TableName;
 				dgvMapList.DataSource = null;
 				dgvMapList.DataSource = MapBindingSource;
 				dgvMapList.AutoGenerateColumns = true;
@@ -288,33 +224,8 @@ namespace ArmAssembly
 							MessageBoxButtons.OK, MessageBoxIcon.Stop, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
 						return;
 					}
-
-					try
-					{
-						int SymbolIndex = LssList.SymbolList.FindIndex(x => (x.Memory == ItemAddress));
-						if (SymbolIndex < 0)
-						{
-							throw new NullReferenceException();
-						}
-						int StartIndex, EndIndex;
-						StartIndex = LssList.ElementList.FindIndex(x => (x.Memory == LssList.SymbolList[SymbolIndex].Memory));
-						if (SymbolIndex != LssList.SymbolList.Count - 1)
-						{
-							EndIndex = LssList.ElementList.FindIndex(x => (x.Memory == LssList.SymbolList[SymbolIndex + 1].Memory));
-						}
-						else
-						{
-							EndIndex = LssList.ElementList.Count;
-						}
-
-						AddSymbol?.Invoke(LssList, StartIndex, EndIndex);
-					}
-					catch (NullReferenceException arg)
-					{
-						MessageBox.Show("Matching Symbol doesn't exist", "No Reference!", 
-							MessageBoxButtons.OK, MessageBoxIcon.Stop, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
-						return;
-					}
+					
+					DoMakeSymbolTab(ItemAddress);
 
 					index++;
 				}

@@ -13,6 +13,7 @@ namespace ArmAssembly
 {
 	public partial class Form1 : Form
 	{
+		ArmAsmDataBase DataBase;
 		Visualizer Vis;
 		ViewSymbolAsm Sym;
 		LssAnalyzer Analyzer;
@@ -20,6 +21,8 @@ namespace ArmAssembly
 		public Form1()
 		{
 			InitializeComponent();
+
+			DataBase = new ArmAsmDataBase(UpdateProgressBar);
 		}
 
 		private void Form1_Load(object sender, EventArgs e)
@@ -31,10 +34,10 @@ namespace ArmAssembly
 			Sym.Dock = DockStyle.Fill;
 			Sym.Show();
 			
-			Analyzer = new LssAnalyzer(UpdateProgressBar);
+			Analyzer = new LssAnalyzer(DataBase.BackgroundLoader, DataBase.MapSource);
 			Analyzer.MdiParent = this;
 			Analyzer.VisibleChanged += new EventHandler(FormVisibleStateChanged);
-			Analyzer.AddSymbolTable = new LssAnalyzer.AddSymbolASM(Sym.AddAsmTab);
+			Analyzer.DoMakeSymbolTab += new LssAnalyzer.MakeSymbolTab(AddSymbolTab);
 			Analyzer.IsTableExist = new LssAnalyzer.IsTableExists(Sym.IsTableExist);
 			splitContainer2.Panel1.Controls.Add(Analyzer);
 			Analyzer.Dock = DockStyle.Fill;
@@ -124,7 +127,7 @@ namespace ArmAssembly
 		{
 			if (Sym.ResetPointer())
 			{
-				Vis = new Visualizer(Sym.GetCurrnetSymbol(), Analyzer.GetMemoryRow);
+				Vis = new Visualizer(Sym.GetCurrnetSymbol(), DataBase.GetMemoryRow);
 				Vis.MdiParent = this;
 				splitContainer1.Panel1.Controls.Add(Vis);
 				Vis.Dock = DockStyle.Fill;
@@ -165,6 +168,20 @@ namespace ArmAssembly
 			ToolStripProgressBar bar = (ToolStripProgressBar)msMenu.Items["FileLoadRate"];
 
 			bar.Value = arg.ProgressPercentage;
+		}
+		private void AddSymbolTab(uint SymbolAddr)
+		{
+			int StartIndex = 0, EndIndex = 0;
+			LssContainer LssList = DataBase.FindMatchingLss(SymbolAddr, ref StartIndex, ref EndIndex);
+			if (LssList != null)
+			{
+				Sym.AddAsmTab(LssList, StartIndex, EndIndex);
+			}
+			else
+			{
+				MessageBox.Show("Matching Symbol doesn't exist", "No Reference!",
+					MessageBoxButtons.OK, MessageBoxIcon.Stop, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
+			}
 		}
 	}
 }
