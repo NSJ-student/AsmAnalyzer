@@ -27,7 +27,7 @@ namespace ArmAssembly
 				{
 					LssElements element = new LssElements(str);
 					ElementList.Add(element);
-					if(element.Symbol != null)
+					if(!element.Symbol.Equals(""))
 						SymbolList.Add(element);
 				}
 			}
@@ -44,7 +44,7 @@ namespace ArmAssembly
 				{
 					LssElements element = new LssElements(str);
 					ElementList.Add(element);
-					if (element.Symbol != null)
+					if (!element.Symbol.Equals(""))
 						SymbolList.Add(element);
 				}
 				Update((cnt + 1) * 100 / AllStrings.Length);
@@ -96,14 +96,11 @@ namespace ArmAssembly
 				}
 			}
 		}
-		public string Memory
+		public uint Memory
 		{
 			get
 			{
-				if (MemoryPosition == 0)
-					return null;
-				else
-					return MemoryPosition.ToString("X");
+				return MemoryPosition;
 			}
 		}
 		public string Symbol
@@ -118,8 +115,8 @@ namespace ArmAssembly
 		{
 			get
 			{
-				if ((MemoryPosition == 0)||(strInstruction == null))
-					return null;
+				if ((MemoryPosition == 0)||(strInstruction.Equals("")))
+					return "";
 				else
 					return hexInstruction.ToString("X");
 			}
@@ -179,8 +176,9 @@ namespace ArmAssembly
 					Name = arrstr[1].Trim();
 					MemoryPosition = Convert.ToUInt32(arrstr[0].Trim(), 16);
 					hexInstruction = 0;
-					strInstruction = null;
-					strParameter = null;
+					strInstruction = "";
+					strParameter = "";
+					Comment = "";
 					return;
 				}
 				else if ((strLine[8] == ':') && (strLine[9] == '\t'))
@@ -188,11 +186,15 @@ namespace ArmAssembly
 					string[] cmt = strLine.Split(new char[] { ';' });
 					string[] split1 = cmt[0].Split(new char[] { ':' });
 
-					Name = null;
+					Name = "";
 					MemoryPosition = Convert.ToUInt32(split1[0].Trim(), 16);
 					if (cmt.Length >= 2)
 					{
 						Comment = cmt[1];
+					}
+					else
+					{
+						Comment = "";
 					}
 
 					string[] split2 = split1[1].Split(new char[] { '\t' });
@@ -205,8 +207,13 @@ namespace ArmAssembly
 						{
 							strParameter = split2[3];
 						}
+						else
+						{
+							strParameter = "";
+						}
 						if (strInstruction.Equals(".word"))
 						{
+							strParameter = strParameter.Replace("0x", "");
 							Type = LssType.WORD_DATA;
 						}
 						else
@@ -220,23 +227,32 @@ namespace ArmAssembly
 						strParameter = middle.TrimEnd(); //split2[1];
 //						hexInstruction = Convert.ToUInt32(middle.Replace(" ", string.Empty), 16);
 						hexInstruction = 0;
+						strInstruction = "";
 						Type = LssType.ARR_DATA;
 						if(Comment == null)
 						{
 							string[] devide = split2[1].Split();
 							Comment = devide[devide.Length - 1];
 						}
+						else
+						{
+							Comment = "";
+						}
 					}
 					return;
 				}
 			}
 			Type = LssType.CSOURCE;
-			Name = null;
+			Name = "";
 			MemoryPosition = 0;
 			hexInstruction = 0;
-			strInstruction = null;
+			strInstruction = "";
 			Comment = strLine;
-			strParameter = null;
+			strParameter = "";
+		}
+		~LssElements()
+		{
+			refCount--;
 		}
 	}
 }

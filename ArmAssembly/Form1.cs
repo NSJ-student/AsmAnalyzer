@@ -45,6 +45,11 @@ namespace ArmAssembly
 			msMenu.Items.Add(bar);
 		}
 
+		/// <summary>
+		/// map 목록창, lss 목록창 visible 상태에 따라 메뉴의 체크 상태 변경
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void FormVisibleStateChanged(object sender, EventArgs e)
 		{
 			ToolStripMenuItem item;
@@ -72,6 +77,11 @@ namespace ArmAssembly
 			}
 		}
 
+		/// <summary>
+		/// map(symbol) 목록창 보이기/숨기기
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void tsmiSymbolLoader_Click(object sender, EventArgs e)
 		{
 			ToolStripMenuItem item = (ToolStripMenuItem)tsmiSymbolLoader;
@@ -86,6 +96,11 @@ namespace ArmAssembly
 			}
 		}
 
+		/// <summary>
+		/// lss(어셈블리) 목록창 보이기/숨기기
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void tsmiAsmAnalyzer_Click(object sender, EventArgs e)
 		{
 			ToolStripMenuItem item = (ToolStripMenuItem)tsmiAsmAnalyzer;
@@ -100,6 +115,11 @@ namespace ArmAssembly
 			}
 		}
 		
+		/// <summary>
+		/// 어셈블리 명령 해석 시작
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void tsmiAnalyzeRun_Click(object sender, EventArgs e)
 		{
 			if (Sym.ResetPointer())
@@ -115,11 +135,17 @@ namespace ArmAssembly
 			}
 		}
 
+		/// <summary>
+		/// 다음 어셈블리 명령을 해석
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void tsmiNext_Click(object sender, EventArgs e)
 		{
 			if(Sym.ToNextRow())
 			{
-				Vis.SetInput(Sym.GetCurrentRow());
+				object[] obj = Sym.GetCurrentLssRow();
+				Vis.SetInput((string)obj[1], (uint)obj[2], (string)obj[5], (string)obj[6]);
 			}
 			else
 			{
@@ -129,6 +155,11 @@ namespace ArmAssembly
 			}
 		}
 		
+		/// <summary>
+		/// map, lss 파일 불러오기 진행 상황
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <param name="arg"></param>
 		private void UpdateProgressBar(object obj, ProgressChangedEventArgs arg)
 		{
 			ToolStripProgressBar bar = (ToolStripProgressBar)msMenu.Items["FileLoadRate"];

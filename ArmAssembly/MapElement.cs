@@ -195,12 +195,11 @@ namespace ArmAssembly
 				return SymbolName;
 			}
 		}
-		[DisplayName("Address(hex)")]
-		public string Address
+		public uint Memory
 		{
 			get
 			{
-				return MemAddr.ToString("X");
+				return MemAddr;
 			}
 		}
 		public uint Size
@@ -281,7 +280,10 @@ namespace ArmAssembly
 				}
 			}
 		}
-
+		~MapElements()
+		{
+			refCount--;
+		}
 		MapType SortMapType(string strMapType)
 		{
 			if (strMapType.Equals("text"))

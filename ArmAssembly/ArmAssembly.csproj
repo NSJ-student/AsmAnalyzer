@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArmAsmDataBase.cs" />
     <Compile Include="AsmInterpreter.cs" />
     <Compile Include="FindRows.cs">
       <SubType>Form</SubType>

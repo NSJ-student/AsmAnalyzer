@@ -96,7 +96,7 @@ namespace ArmAssembly
 		/// 현재 선택된 행의 데이터를 object[]로 반환
 		/// </summary>
 		/// <returns></returns>
-		public object[] GetCurrentRow()
+		public object[] GetCurrentLssRow()
 		{
 			DataGridView data = ControlList.Find(x => x.Tab.Equals(tabSymbolAsm.SelectedTab)).GridViewControl;
 			DataRowView view = (DataRowView)data.SelectedRows[0].DataBoundItem;
@@ -257,6 +257,7 @@ namespace ArmAssembly
 			
 			ldgvData.DataSource = null;
 			ldgvData.DataSource = lssBindingSource;
+			ldgvData.Columns["Memory"].DefaultCellStyle.Format = "X04";
 
 			RefNumber++;
 		}

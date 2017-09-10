@@ -8,13 +8,14 @@ namespace ArmAssembly
 {
 	public static class AsmInterpreter
 	{
-		public delegate object[] GetMatchedRow(string memory);
+		public delegate MemInfo GetMatchedRow(string memory);
 		public enum ParamType
 		{
 			Register,
 			AbsoluteAddress,
 			RegRelativeAddress,
 			PcRelativeAddress,
+			StackRelativeAddress,
 			Integer,
 			Vector,
 			None
@@ -31,12 +32,8 @@ namespace ArmAssembly
 		// 7 comment
 		// 8 allstring
 		// 9 element type
-		public static void ParseInstruction(object[] Source, RegisterControl[] Regs, GetMatchedRow getMemValue)
+		public static void ParseInstruction(string Instruction, string Parameter, RegisterControl[] Regs, GetMatchedRow getMemValue)
 		{
-			string Instruction	= (string)Source[5];
-			string Parameter	= (string)Source[6];
-			Regs[15].txtValue.Text = (string)Source[2];
-			
 			if (Instruction.Equals("mov") || Instruction.Equals("movs"))
 			{
 				string[] Pars = SplitParam(Parameter);
@@ -56,42 +53,91 @@ namespace ArmAssembly
 
 		public static bool Move(string dstOperand, string srcOperand, RegisterControl[] Regs, GetMatchedRow getMemValue)
 		{
-			string pc = Regs[15].txtValue.Text;
+			uint pc = Convert.ToUInt32(Regs[15].txtValue.Text, 16);
 			ParamType dstType = ParamType.None;
 			ParamType srcType = ParamType.None;
 			string src = ParseToHexString(pc, srcOperand, Regs, ref srcType);
 			string dest = ParseToHexString(pc, dstOperand, Regs, ref dstType);
-			string result;
-			
-			if ((srcType == ParamType.RegRelativeAddress) ||
+			string srcResult;
+			string dstResult;
+
+			// src 값을 srcResult에 저장
+			if (srcType == ParamType.Register)
+			{
+				uint regPos = Convert.ToUInt32(src.Replace("r", ""));
+				srcResult = Regs[regPos].txtValue.Text;
+			}
+			else if ((srcType == ParamType.RegRelativeAddress) ||
 				(srcType == ParamType.PcRelativeAddress) ||
 				(srcType == ParamType.AbsoluteAddress))
 			{
-				object[] memRow = getMemValue(src);
+				MemInfo memRow = getMemValue(src);
+
 				if (memRow != null)
 				{
-					result = ((string)memRow[6]).Replace("0x", "");
+					switch(memRow.Area)
+					{
+						case MemInfo.MemArea.RODATA:
+						case MemInfo.MemArea.DATA:
+						case MemInfo.MemArea.BSS:
+						case MemInfo.MemArea.WORD:
+							srcResult = memRow.Value;
+							break;
+						default:
+							srcResult = null;
+							return false;
+					}
 				}
 				else
 				{
-					result = null;
+					srcResult = null;
 					return false;
 				}
 			}
+			else if(srcType == ParamType.StackRelativeAddress)
+			{
+				srcResult = src;
+			}
 			else
 			{
-				result = src;
+				srcResult = src;
 			}
 
+			// srcResult값을 dst에 저장
 			if (dstType == ParamType.Register)
 			{
 				uint regPos = Convert.ToUInt32(dest.Replace("r", ""));
-				Regs[regPos].txtValue.Text = result;
+				Regs[regPos].txtValue.Text = srcResult;
 			}
-			else if ((dstType != ParamType.None) && (dstType != ParamType.Vector))
+			else if ((dstType == ParamType.RegRelativeAddress) ||
+				(dstType == ParamType.PcRelativeAddress) ||
+				(dstType == ParamType.AbsoluteAddress))
 			{
-				// 특정 어드레스로 출력
-				Regs[14].txtValue.Text = dest;
+				MemInfo memRow = getMemValue(src);
+				if (memRow != null)
+				{
+					switch (memRow.Area)
+					{
+						case MemInfo.MemArea.DATA:
+						case MemInfo.MemArea.BSS:
+							dstResult = memRow.MemAddr;
+							break;
+						default:
+							return false;
+					}
+				}
+				else
+				{
+					return false;
+				}
+			}
+			else if(dstType == ParamType.StackRelativeAddress)
+			{
+				return false;
+			}
+			else
+			{
+				return false;
 			}
 
 			return true;
@@ -179,24 +225,24 @@ namespace ArmAssembly
 		///     ex5) #13 => return D
 		/// </summary>
 		/// <param name="pc"></param>
-		/// <param name="Input"></param>
+		/// <param name="Operand"></param>
 		/// <param name="Reg"></param>
 		/// <param name="type"></param>
 		/// <returns></returns>
-		public static string ParseToHexString(string pc, string Input, RegisterControl[] Reg, ref ParamType type)
+		public static string ParseToHexString(uint pc, string Operand, RegisterControl[] Reg, ref ParamType type)
 		{
 			string result = "";
 
-			if (Input[0] == 'r')
+			if (Operand[0] == 'r')
 			{
 				// register
 				type = ParamType.Register;
-				result = Input;
+				result = Operand;
 			}
-			else if (Input[0] == '[')
+			else if (Operand[0] == '[')
 			{
 				// relative address
-				string[] split = Input.Split(new char[] { ' ', ',', '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
+				string[] split = Operand.Split(new char[] { ' ', ',', '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
 				foreach (string item in split)
 				{
 					if(item[0] == 'r')
@@ -208,14 +254,13 @@ namespace ArmAssembly
 					else if (item.Equals("pc"))
 					{
 						type = ParamType.PcRelativeAddress;
-						result = AddHexString(result, pc);
-						result = AddHexString(result, "4");
+						result = AddHexString(result, (pc+4).ToString("X"));
 					}
 					else if(item.Equals("sp"))
 					{
-						type = ParamType.RegRelativeAddress;
-						string reg_val = GetRegValue("r13", Reg);
-						result = AddHexString(result, reg_val);
+						type = ParamType.StackRelativeAddress;
+					//	string reg_val = GetRegValue("r13", Reg);
+						result = AddHexString(result, "0");
 					}
 					else if (item.Equals("lr"))
 					{
@@ -231,31 +276,31 @@ namespace ArmAssembly
 					}
 				}
 			}
-			else if (Input[0] == '{')
+			else if (Operand[0] == '{')
 			{
 				// vector
 				type = ParamType.None;
 			}
-			else if (Input[0] == '<')
+			else if (Operand[0] == '<')
 			{
 				// symbol
 				type = ParamType.None;
 			}
-			else if (Input[0] == '#')
+			else if (Operand[0] == '#')
 			{
 				// decimal
 				type = ParamType.Integer;
-				string dec = Input.Replace("#", "");
+				string dec = Operand.Replace("#", "");
 				uint value = Convert.ToUInt32(dec);
 				result = AddHexString(result, value.ToString("X"));
 			}
-			else if (((0 <= Input[0])	&& (Input[0] <= '9'))	||
-					 (('a' <= Input[0]) && (Input[0] <= 'z'))	||
-					 (('A' <= Input[0]) && (Input[0] <= 'F')))
+			else if (((0 <= Operand[0])	&& (Operand[0] <= '9'))	||
+					 (('a' <= Operand[0]) && (Operand[0] <= 'z'))	||
+					 (('A' <= Operand[0]) && (Operand[0] <= 'F')))
 			{
 				// hexa
 				type = ParamType.Integer;
-				result = Input;
+				result = Operand;
 			}
 
 			return result;
@@ -304,6 +349,46 @@ namespace ArmAssembly
 			}
 
 			return strList.ToArray();
+		}
+	}
+	public class MemInfo
+	{
+		public enum MemArea
+		{
+			WORD,
+			RODATA,
+			BSS,
+			DATA,
+			NONE
+		};
+		public string MemAddr;
+		public string Symbol;
+		public string Value;
+		string strArea;
+
+		public MemArea Area
+		{
+			get
+			{
+				if (strArea.Equals("text"))
+					return MemArea.WORD;
+				else if (strArea.Equals("bss"))
+					return MemArea.BSS;
+				else if (strArea.Equals("data"))
+					return MemArea.DATA;
+				else if(strArea.Equals("rodata"))
+					return MemArea.RODATA;
+				else
+					return MemArea.NONE;
+			}
+		}
+
+		public MemInfo(string argAddr, string argName, string argVal, string argArea)
+		{
+			MemAddr = argAddr;
+			Symbol = argName;
+			Value = argVal;
+			strArea = argArea;
 		}
 	}
 }

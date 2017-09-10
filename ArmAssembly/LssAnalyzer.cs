@@ -80,18 +80,20 @@ namespace ArmAssembly
 		/// </summary>
 		/// <param name="memory"></param>
 		/// <returns></returns>
-		public object[] GetMemoryRow(string memory)
+		public MemInfo GetMemoryRow(string memory)
 		{
-			LssElements data = LssList.ElementList.Find(x => (x.Memory != null) && (x.Memory.Equals(memory)));
+			uint uiMemory = Convert.ToUInt32(memory, 16);
+			MapElements mapData = MapList.ElementList.Find(x => (x.Memory <= uiMemory) && (uiMemory < (x.Memory + x.Size)));
+			LssElements lssData = LssList.ElementList.Find(x => (x.Memory == uiMemory));
 
-			if (data != null)
+			if (lssData != null)
 			{
-				object[] retValue = new object[10];
-				retValue[0] = data.Index; retValue[1] = data.Area;
-				retValue[2] = data.Memory; retValue[3] = data.Symbol;
-				retValue[4] = data.HexInstruction; retValue[5] = data.Instruction;
-				retValue[6] = data.Parameter; retValue[7] = data.CommentValue;
-				retValue[8] = data.StringLine; retValue[9] = data.ElementType;
+				MemInfo retValue = new MemInfo(lssData.Memory.ToString("X"), lssData.Symbol, lssData.Parameter, mapData.Area);
+				return retValue;
+			}
+			else if(mapData != null)
+			{
+				MemInfo retValue = new MemInfo(mapData.Memory.ToString("X"), mapData.Symbol, "0", mapData.Area);
 				return retValue;
 			}
 			else
@@ -154,6 +156,7 @@ namespace ArmAssembly
 				dgvMapList.DataSource = null;
 				dgvMapList.DataSource = MapBindingSource;
 				dgvMapList.AutoGenerateColumns = true;
+				dgvMapList.Columns["Memory"].DefaultCellStyle.Format = "X04";
 				btnLoadLssFile.Enabled = true;
 				MessageBox.Show("Load Map File Completed!");
 			}
@@ -255,27 +258,26 @@ namespace ArmAssembly
 					return;
 				}
 				DataGridViewSelectedRowCollection test = dgvMapList.SelectedRows;
-				string[] symbols = new string[test.Count];
 				int index = 0;
 
 				foreach (DataGridViewRow item in test)
 				{
 					string ItemSymbol;
-					string ItemAddress;
+					uint ItemAddress;
 					try
 					{
 						DataRowView view = (DataRowView)item.DataBoundItem;
 						ItemSymbol = (string)view.Row.ItemArray[2];
-						ItemAddress = (string)view.Row.ItemArray[3];
+						ItemAddress = (uint)view.Row.ItemArray[3];
 					}
 					catch
 					{
 						MapElements element = (MapElements)item.DataBoundItem;
 						ItemSymbol = element.Symbol;
-						ItemAddress = element.Address;
+						ItemAddress = element.Memory;
 					}
 
-					if (Convert.ToInt32(ItemAddress, 16) == 0)
+					if (ItemAddress == 0)
 					{
 						return;
 					}
@@ -286,22 +288,19 @@ namespace ArmAssembly
 							MessageBoxButtons.OK, MessageBoxIcon.Stop, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
 						return;
 					}
-					symbols[index] = ItemSymbol;
 
 					try
 					{
-						int SymbolIndex = LssList.SymbolList.FindIndex(x => x.Memory.Equals(ItemAddress, StringComparison.OrdinalIgnoreCase));
+						int SymbolIndex = LssList.SymbolList.FindIndex(x => (x.Memory == ItemAddress));
 						if (SymbolIndex < 0)
 						{
 							throw new NullReferenceException();
 						}
 						int StartIndex, EndIndex;
-						StartIndex = LssList.ElementList.FindIndex(x =>
-								!string.IsNullOrEmpty(x.Memory) && x.Memory.Equals(LssList.SymbolList[SymbolIndex].Memory, StringComparison.OrdinalIgnoreCase));
+						StartIndex = LssList.ElementList.FindIndex(x => (x.Memory == LssList.SymbolList[SymbolIndex].Memory));
 						if (SymbolIndex != LssList.SymbolList.Count - 1)
 						{
-							EndIndex = LssList.ElementList.FindIndex(x =>
-								!string.IsNullOrEmpty(x.Memory) && x.Memory.Equals(LssList.SymbolList[SymbolIndex + 1].Memory, StringComparison.OrdinalIgnoreCase));
+							EndIndex = LssList.ElementList.FindIndex(x => (x.Memory == LssList.SymbolList[SymbolIndex + 1].Memory));
 						}
 						else
 						{

@@ -46,24 +46,14 @@ namespace ArmAssembly
 		/// ViewSymbolAsm에서 선택한 행의 어셈블리를 번역하여 레지스터 등에 적용하는 동작을 현 UI에 적용
 		/// </summary>
 		/// <param name="input"></param>
-		public void SetInput(object[] input)
+		public void SetInput(string Type, uint MemAddr, string Instruction, string Parameter)
 		{
-			if(input[1].Equals("assembly"))
+			if(Type.Equals("assembly"))
 			{
 				try
 				{
-					string MemAddr = (string)input[2];
-					string Instruction = (string)input[5];
-					string Parameter = (string)input[6];
 					string[] Par = AsmInterpreter.SplitParam(Parameter);
-					/*
-					for(int cnt=0; cnt<Par.Length; cnt++)
-					{
-						AsmInterpreter.ParamType type = AsmInterpreter.ParamType.None;
-						RegArray[cnt].txtValue.Text = AsmInterpreter.ParseToHexString(MemAddr, Par[cnt], RegArray, ref type);
-						RegArray[15].txtValue.Text = type.ToString();
-					}
-					*/
+					RegArray[15].txtValue.Text = MemAddr.ToString("X");
 
 					AsmInterpreter.ParamType type = AsmInterpreter.ParamType.None;
 					txtInst.Text = Instruction;
@@ -82,12 +72,13 @@ namespace ArmAssembly
 						txtParam3.Text = Par[2];
 						txtParam3ToHex.Text = AsmInterpreter.ParseToHexString(MemAddr, Par[2], RegArray, ref type);
 					}
-					txtInputAll.Text = (string)input[8];
 
-					AsmInterpreter.ParseInstruction(input, RegArray, GetMemRow);
+					AsmInterpreter.ParseInstruction(Instruction, Parameter, RegArray, GetMemRow);
+					txtInputAll.Text = "OK";
 				}
 				catch
 				{
+					RegArray[15].txtValue.Text = MemAddr.ToString("X");
 					txtInst.Clear();
 					txtParam1.Clear();
 					txtParam2.Clear();
@@ -96,10 +87,11 @@ namespace ArmAssembly
 			}
 			else
 			{
+				RegArray[15].txtValue.Text = MemAddr.ToString("X");
 				txtInst.Clear();
 				txtParam1.Clear();
 				txtParam2.Clear();
-				txtInputAll.Text = (string)input[8];
+				txtInputAll.Text = "OK";
 			}
 
 		}
@@ -185,7 +177,7 @@ namespace ArmAssembly
 		{
 			foreach(RegisterControl item in RegArray)
 			{
-				item.txtValue.Clear();
+				item.txtValue.Text = "0";
 			}
 		}
 	}
