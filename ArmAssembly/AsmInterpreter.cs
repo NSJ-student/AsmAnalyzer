@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 
 namespace ArmAssembly
 {
-	public static class AsmInterpreter
+	public delegate string GetValue(MemInfo refer);
+	public delegate bool SetValue(MemInfo refer);
+	public class AsmInterpreter
 	{
-		public delegate MemInfo GetMatchedRow(string memory);
+		GetValue getValue;
+		SetValue setValue;
 		public enum ParamType
 		{
 			Register,
@@ -21,6 +24,12 @@ namespace ArmAssembly
 			None
 		};
 
+		public AsmInterpreter(GetValue argGet, SetValue argSet)
+		{
+			getValue = argGet;
+			setValue = argSet;
+		}
+
 		// Source[10]
 		// 0 index
 		// 1 area
@@ -32,65 +41,47 @@ namespace ArmAssembly
 		// 7 comment
 		// 8 allstring
 		// 9 element type
-		public static void ParseInstruction(string Instruction, string Parameter, RegisterControl[] Regs, GetMatchedRow getMemValue)
+		public void ParseInstruction(string Instruction, string Parameter)
 		{
 			if (Instruction.Equals("mov") || Instruction.Equals("movs"))
 			{
 				string[] Pars = SplitParam(Parameter);
-				Move(Pars[0], Pars[1], Regs, getMemValue);
+				Move(Pars[0], Pars[1]);
 			}
 			if (Instruction.Equals("str") || Instruction.Equals("strb"))
 			{
 				string[] Pars = SplitParam(Parameter);
-				Move(Pars[1], Pars[0], Regs, getMemValue);
+				Move(Pars[1], Pars[0]);
 			}
 			if (Instruction.Equals("ldr") || Instruction.Equals("ldrb"))
 			{
 				string[] Pars = SplitParam(Parameter);
-				Move(Pars[0], Pars[1], Regs, getMemValue);
+				Move(Pars[0], Pars[1]);
 			}
 		}
 
-		public static bool Move(string dstOperand, string srcOperand, RegisterControl[] Regs, GetMatchedRow getMemValue)
+		public bool Move(string dstOperand, string srcOperand)
 		{
-			uint pc = Convert.ToUInt32(Regs[15].txtValue.Text, 16);
+			uint pc = Convert.ToUInt32(getValue(new MemInfo("r15", null, null, MemInfo.MemArea.REGISTER)), 16);
 			ParamType dstType = ParamType.None;
 			ParamType srcType = ParamType.None;
-			string src = ParseToHexString(pc, srcOperand, Regs, ref srcType);
-			string dest = ParseToHexString(pc, dstOperand, Regs, ref dstType);
+			string src = ParseToHexString(pc, srcOperand, ref srcType);
+			string dest = ParseToHexString(pc, dstOperand, ref dstType);
 			string srcResult;
-			string dstResult;
 
 			// src 값을 srcResult에 저장
 			if (srcType == ParamType.Register)
 			{
-				uint regPos = Convert.ToUInt32(src.Replace("r", ""));
-				srcResult = Regs[regPos].txtValue.Text;
+				srcResult = getValue(new MemInfo(src, null, null, MemInfo.MemArea.REGISTER));
 			}
 			else if ((srcType == ParamType.RegRelativeAddress) ||
 				(srcType == ParamType.PcRelativeAddress) ||
 				(srcType == ParamType.AbsoluteAddress))
 			{
-				MemInfo memRow = getMemValue(src);
+				srcResult = getValue(new MemInfo(src, null, null, MemInfo.MemArea.DATA));
 
-				if (memRow != null)
+				if (srcResult == null)
 				{
-					switch(memRow.Area)
-					{
-						case MemInfo.MemArea.RODATA:
-						case MemInfo.MemArea.DATA:
-						case MemInfo.MemArea.BSS:
-						case MemInfo.MemArea.WORD:
-							srcResult = memRow.Value;
-							break;
-						default:
-							srcResult = null;
-							return false;
-					}
-				}
-				else
-				{
-					srcResult = null;
 					return false;
 				}
 			}
@@ -106,27 +97,15 @@ namespace ArmAssembly
 			// srcResult값을 dst에 저장
 			if (dstType == ParamType.Register)
 			{
-				uint regPos = Convert.ToUInt32(dest.Replace("r", ""));
-				Regs[regPos].txtValue.Text = srcResult;
+				setValue(new MemInfo(dest, null, srcResult, MemInfo.MemArea.REGISTER));
 			}
 			else if ((dstType == ParamType.RegRelativeAddress) ||
 				(dstType == ParamType.PcRelativeAddress) ||
 				(dstType == ParamType.AbsoluteAddress))
 			{
-				MemInfo memRow = getMemValue(src);
-				if (memRow != null)
-				{
-					switch (memRow.Area)
-					{
-						case MemInfo.MemArea.DATA:
-						case MemInfo.MemArea.BSS:
-							dstResult = memRow.MemAddr;
-							break;
-						default:
-							return false;
-					}
-				}
-				else
+				bool ret = setValue(new MemInfo(dest, null, srcResult, MemInfo.MemArea.DATA));
+
+				if (ret == false)
 				{
 					return false;
 				}
@@ -143,52 +122,7 @@ namespace ArmAssembly
 			return true;
 		}
 
-		public static ParamType GetSourceType(object[] RowArray)
-		{
-			if((LssElements.LssType)RowArray[9] == LssElements.LssType.ASSEM_INSTRUCTION)
-			{
-				string Param = (string)RowArray[6];
-				string[] split = Param.Split(new char[] { ',', ' ' }, 2);
-
-				return ParamType.None;
-			}
-			else
-			{
-				return ParamType.None;
-			}
-		}
-
-		/// <summary>
-		/// get regiter value from Visualizer's textBox control
-		/// </summary>
-		/// <param name="strReg"></param> => register name (r1, r4...)
-		/// <param name="Reg"></param>
-		/// <returns></returns>
-		public static string GetRegValue(string strReg, RegisterControl[] Reg)
-		{
-			string regnum = strReg.Replace("r", "").Trim();
-			string RegValue = Reg[Convert.ToUInt32(regnum)].txtValue.Text;
-
-			if (RegValue.Length == 0)
-			{
-				return strReg;
-			}
-			else
-			{
-				string Format = Reg[Convert.ToUInt32(regnum)].btnFormat.Text;
-				if (Format.Equals("DEX"))
-				{
-					uint value = Convert.ToUInt32(RegValue);
-					return value.ToString("X");
-				}
-				else
-				{
-					return RegValue;
-				}
-			}
-		}
-
-		public static string AddHexString(string Old, string AddHex)
+		public string AddHexString(string Old, string AddHex)
 		{
 			string result = Old;
 			
@@ -229,7 +163,7 @@ namespace ArmAssembly
 		/// <param name="Reg"></param>
 		/// <param name="type"></param>
 		/// <returns></returns>
-		public static string ParseToHexString(uint pc, string Operand, RegisterControl[] Reg, ref ParamType type)
+		public string ParseToHexString(uint pc, string Operand, ref ParamType type)
 		{
 			string result = "";
 
@@ -248,7 +182,7 @@ namespace ArmAssembly
 					if(item[0] == 'r')
 					{
 						type = ParamType.RegRelativeAddress;
-						string reg_val = GetRegValue(item, Reg);
+						string reg_val = getValue(new MemInfo(item, null, null, MemInfo.MemArea.REGISTER));
 						result = AddHexString(result, reg_val);
 					}
 					else if (item.Equals("pc"))
@@ -265,7 +199,7 @@ namespace ArmAssembly
 					else if (item.Equals("lr"))
 					{
 						type = ParamType.RegRelativeAddress;
-						string reg_val = GetRegValue("r14", Reg);
+						string reg_val = getValue(new MemInfo("r14", null, null, MemInfo.MemArea.REGISTER));
 						result = AddHexString(result, reg_val);
 					}
 					else if(item[0] == '#')
@@ -317,7 +251,7 @@ namespace ArmAssembly
 		/// </summary>
 		/// <param name="Param"></param>
 		/// <returns></returns>
-		public static string[] SplitParam(string Param)
+		public string[] SplitParam(string Param)
 		{
 			List<string> strList = new List<string>();
 			strList.Add("");
@@ -350,6 +284,22 @@ namespace ArmAssembly
 
 			return strList.ToArray();
 		}
+
+		public static ParamType GetSourceType(object[] RowArray)
+		{
+			if ((LssElements.LssType)RowArray[9] == LssElements.LssType.ASSEM_INSTRUCTION)
+			{
+				string Param = (string)RowArray[6];
+				string[] split = Param.Split(new char[] { ',', ' ' }, 2);
+
+				return ParamType.None;
+			}
+			else
+			{
+				return ParamType.None;
+			}
+		}
+
 	}
 	public class MemInfo
 	{
@@ -359,36 +309,43 @@ namespace ArmAssembly
 			RODATA,
 			BSS,
 			DATA,
+			STACK,
+			REGISTER,
 			NONE
 		};
 		public string MemAddr;
 		public string Symbol;
 		public string Value;
-		string strArea;
-
-		public MemArea Area
-		{
-			get
-			{
-				if (strArea.Equals("text"))
-					return MemArea.WORD;
-				else if (strArea.Equals("bss"))
-					return MemArea.BSS;
-				else if (strArea.Equals("data"))
-					return MemArea.DATA;
-				else if(strArea.Equals("rodata"))
-					return MemArea.RODATA;
-				else
-					return MemArea.NONE;
-			}
-		}
-
+		public MemArea Area;
+		
 		public MemInfo(string argAddr, string argName, string argVal, string argArea)
 		{
 			MemAddr = argAddr;
 			Symbol = argName;
 			Value = argVal;
-			strArea = argArea;
+			if (argArea.Equals("text"))
+				Area = MemArea.WORD;
+			else if (argArea.Equals("bss"))
+				Area = MemArea.BSS;
+			else if (argArea.Equals("common"))
+				Area = MemArea.BSS;
+			else if (argArea.Equals("data"))
+				Area = MemArea.DATA;
+			else if (argArea.Equals("rodata"))
+				Area = MemArea.RODATA;
+			else if (argArea.Equals("register"))
+				Area = MemArea.RODATA;
+			else if (argArea.Equals("stack"))
+				Area = MemArea.RODATA;
+			else
+				Area = MemArea.NONE;
+		}
+		public MemInfo(string argAddr, string argName, string argVal, MemArea argArea)
+		{
+			MemAddr = argAddr;
+			Symbol = argName;
+			Value = argVal;
+			Area = argArea;
 		}
 	}
 }

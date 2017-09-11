@@ -114,7 +114,48 @@ namespace ArmAssembly
 								strLoop = AllStrings[cnt + 1 + itemcnt];
 							}
 						}
-						if(itemcnt != 0)
+						if (MapElements.StringSortMapType(str) == MapElements.MapType.SYM_COMMON)
+						{
+							int target_cnt = cnt + 1 + itemcnt;
+
+							string[] split = AllStrings[cnt].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+							uint size = Convert.ToUInt32(split[2].Replace("0x", ""), 16);
+							uint endMem = Convert.ToUInt32(split[1].Replace("0x", ""), 16) + size;
+							string FilePath = "";
+							for (int idx=3; idx<split.Length; idx++)
+							{
+								FilePath += split[idx];
+							}
+							cnt++;
+							for (; cnt < target_cnt; cnt++)
+							{
+								if (!AllStrings[cnt].Equals(""))
+								{
+									string[] temp = AllStrings[cnt].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+									uint curMem = Convert.ToUInt32(temp[0].Replace("0x", ""), 16);
+									string[] temp2 = AllStrings[cnt + 1].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+									uint nextMem;
+									if (temp2[1][0] == '0' && temp2[1][1] == 'x')
+									{
+										nextMem = Convert.ToUInt32(temp2[1].Replace("0x", ""), 16);
+									}
+									else if (temp2[0][0] == '0' && temp2[0][1] == 'x')
+									{
+										nextMem = Convert.ToUInt32(temp2[0].Replace("0x", ""), 16);
+									}
+									else
+									{
+										break;
+									}
+									MapElements element = new MapElements(AllStrings[cnt], nextMem - curMem, FilePath);
+									ElementList.Add(element);
+
+									if (nextMem == endMem)
+										break;
+								}
+							}
+						}
+						else if (itemcnt != 0)
 						{
 							string[] arg = new string[itemcnt+1];
 							int target_cnt = cnt + 1 + itemcnt;
@@ -280,6 +321,21 @@ namespace ArmAssembly
 				}
 			}
 		}
+		public MapElements(string input, uint size, string path)
+		{
+			refCount++;
+			IndexNum = refCount;;
+			Type = MapType.SYM_COMMON;
+			MemSize = size;
+			FileLocation = path;
+			// 메모리 주소와 심볼을 분리
+			string[] split1 = input.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+			if (!split1[0].Equals("*fill*"))
+			{
+				MemAddr = Convert.ToUInt32(split1[0].Replace("0x", ""), 16);
+				SymbolName = split1[1];
+			}
+		}
 		~MapElements()
 		{
 			refCount--;
@@ -309,6 +365,10 @@ namespace ArmAssembly
 			else if (strMapType.Equals("bss"))
 			{
 				return MapType.SYM_BSS;
+			}
+			else if (strMapType.Equals("COMMON"))
+			{
+				return MapType.SYM_COMMON;
 			}
 			else
 			{
@@ -347,6 +407,10 @@ namespace ArmAssembly
 			else if (strMapType.Equals("bss"))
 			{
 				return MapType.SYM_BSS;
+			}
+			else if (strMapType.Equals("COMMON"))
+			{
+				return MapType.SYM_COMMON;
 			}
 			else
 			{

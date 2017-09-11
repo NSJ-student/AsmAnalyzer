@@ -12,11 +12,14 @@ namespace ArmAssembly
 {
 	public partial class Visualizer : Form
 	{
-		AsmInterpreter.GetMatchedRow GetMemRow;
+		AsmInterpreter AsmIntp;
+		ArmAsmDataBase.GetMatchingMemory GetMemRow;
 		RegisterControl[] RegArray;
-		public Visualizer(string SymbolName, AsmInterpreter.GetMatchedRow callback)
+		public Visualizer(string SymbolName, ArmAsmDataBase.GetMatchingMemory callback)
 		{
 			InitializeComponent();
+
+			AsmIntp = new AsmInterpreter(GetValue, SetValue);
 
 			GetMemRow = callback;
 
@@ -52,7 +55,7 @@ namespace ArmAssembly
 			{
 				try
 				{
-					string[] Par = AsmInterpreter.SplitParam(Parameter);
+					string[] Par = AsmIntp.SplitParam(Parameter);
 					RegArray[15].txtValue.Text = MemAddr.ToString("X");
 
 					AsmInterpreter.ParamType type = AsmInterpreter.ParamType.None;
@@ -60,20 +63,20 @@ namespace ArmAssembly
 					if (Par.Length > 0)
 					{
 						txtParam1.Text = Par[0];
-						txtParam1ToHex.Text = AsmInterpreter.ParseToHexString(MemAddr, Par[0], RegArray, ref type);
+						txtParam1ToHex.Text = AsmIntp.ParseToHexString(MemAddr, Par[0], ref type);
 					}
 					if (Par.Length > 1)
 					{
 						txtParam2.Text = Par[1];
-						txtParam2ToHex.Text = AsmInterpreter.ParseToHexString(MemAddr, Par[1], RegArray, ref type);
+						txtParam2ToHex.Text = AsmIntp.ParseToHexString(MemAddr, Par[1], ref type);
 					}
 					if (Par.Length > 2)
 					{
 						txtParam3.Text = Par[2];
-						txtParam3ToHex.Text = AsmInterpreter.ParseToHexString(MemAddr, Par[2], RegArray, ref type);
+						txtParam3ToHex.Text = AsmIntp.ParseToHexString(MemAddr, Par[2], ref type);
 					}
 
-					AsmInterpreter.ParseInstruction(Instruction, Parameter, RegArray, GetMemRow);
+					AsmIntp.ParseInstruction(Instruction, Parameter);
 					txtInputAll.Text = "OK";
 				}
 				catch
@@ -179,6 +182,154 @@ namespace ArmAssembly
 			{
 				item.txtValue.Text = "0";
 			}
+		}
+
+
+		private string GetValue(MemInfo refer)
+		{
+			MemInfo info = refer;
+			switch(info.Area)
+			{
+				case MemInfo.MemArea.BSS:
+				case MemInfo.MemArea.DATA:
+				case MemInfo.MemArea.WORD:
+				case MemInfo.MemArea.RODATA:
+					return GetRamValue(info);
+				case MemInfo.MemArea.REGISTER:
+					return GetRegValue(info);
+				case MemInfo.MemArea.STACK:
+					return GetStackValue(info);
+				default:
+					return null;
+			}
+		}
+		private bool SetValue(MemInfo refer)
+		{
+			switch (refer.Area)
+			{
+				case MemInfo.MemArea.BSS:
+				case MemInfo.MemArea.DATA:
+				case MemInfo.MemArea.WORD:
+				case MemInfo.MemArea.RODATA:
+					return PutRamValue(refer);
+				case MemInfo.MemArea.REGISTER:
+					return PutRegValue(refer);
+				case MemInfo.MemArea.STACK:
+					return PutStackValue(refer);
+				default:
+					return false;
+			}
+		}
+
+		private string GetStackValue(MemInfo info)
+		{
+			return null;
+		}
+		private bool PutStackValue(MemInfo info)
+		{
+			return false;
+		}
+		private string GetRamValue(MemInfo info)
+		{
+			MemInfo outinfo = GetMemRow(info.MemAddr);
+
+			if((outinfo.Area == MemInfo.MemArea.BSS)||
+				(outinfo.Area == MemInfo.MemArea.DATA)
+				)
+			{
+				ListViewItem[] items = lvRam.Items.Find(outinfo.MemAddr, true);
+				if (items.Length == 0)
+				{
+					// Define the list items
+					ListViewItem lvi = new ListViewItem(outinfo.MemAddr);
+					lvi.SubItems.Add(outinfo.Symbol);
+					lvi.SubItems.Add(outinfo.Value);
+
+					// Add the list items to the ListView
+					lvRam.Items.Add(lvi);
+					return outinfo.Value;
+				}
+				return items[0].SubItems[2].Text;
+			}
+			else if (outinfo.Area == MemInfo.MemArea.RODATA)
+			{
+				ListViewItem[] items = lvRam.Items.Find(outinfo.MemAddr, true);
+				if(items.Length == 0)
+				{
+					// Define the list items
+					ListViewItem lvi = new ListViewItem(outinfo.MemAddr);
+					lvi.SubItems.Add(outinfo.Symbol);
+					lvi.SubItems.Add(outinfo.Value);
+
+					// Add the list items to the ListView
+					lvRam.Items.Add(lvi);
+				}
+				return outinfo.Value;
+			}
+			else
+			{
+				return outinfo.Value;
+			}
+		}
+		private bool PutRamValue(MemInfo info)
+		{
+			MemInfo outinfo = GetMemRow(info.MemAddr);
+
+			if ((outinfo.Area == MemInfo.MemArea.BSS) ||
+				(outinfo.Area == MemInfo.MemArea.DATA)
+				)
+			{
+				ListViewItem[] items = lvRam.Items.Find(info.MemAddr, true);
+				if (items.Length == 0)
+				{
+					// Define the list items
+					ListViewItem lvi = new ListViewItem(outinfo.MemAddr);
+					lvi.SubItems.Add(outinfo.Symbol);
+					lvi.SubItems.Add(outinfo.Value);
+
+					// Add the list items to the ListView
+					lvRam.Items.Add(lvi);
+				}
+				else
+				{
+					items[0].SubItems[2].Text = info.Value;
+				}
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		private string GetRegValue(MemInfo info)
+		{
+			string regnum = info.MemAddr.Replace("r", "").Trim();
+			string RegValue = RegArray[Convert.ToUInt32(regnum)].txtValue.Text;
+
+			if (RegValue.Length == 0)
+			{
+				return info.MemAddr;
+			}
+			else
+			{
+				string Format = RegArray[Convert.ToUInt32(regnum)].btnFormat.Text;
+				if (Format.Equals("DEX"))
+				{
+					uint value = Convert.ToUInt32(RegValue);
+					return value.ToString("X");
+				}
+				else
+				{
+					return RegValue;
+				}
+			}
+		}
+		private bool PutRegValue(MemInfo info)
+		{
+			string regnum = info.MemAddr.Replace("r", "").Trim();
+			RegArray[Convert.ToUInt32(regnum)].txtValue.Text = info.Value;
+
+			return true;
 		}
 	}
 	public class RegisterControl

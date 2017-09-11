@@ -170,6 +170,7 @@ namespace ArmAssembly
 				dgvMapList.DataSource = null;
 				dgvMapList.DataSource = MapBindingSource;
 				dgvMapList.BackgroundColor = SystemColors.ControlLightLight;
+				dgvMapList.Columns["Memory"].DefaultCellStyle.Format = "X04";
 				return true;
 			}
 			catch

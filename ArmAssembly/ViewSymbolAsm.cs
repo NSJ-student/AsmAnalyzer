@@ -330,6 +330,7 @@ namespace ArmAssembly
 				lssBindingSource.Filter = filter;
 				ldgvData.DataSource = null;
 				ldgvData.DataSource = lssBindingSource;
+				ldgvData.Columns["Memory"].DefaultCellStyle.Format = "X04";
 				return true;
 			}
 			catch

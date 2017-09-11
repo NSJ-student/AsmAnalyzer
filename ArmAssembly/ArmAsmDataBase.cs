@@ -11,6 +11,7 @@ namespace ArmAssembly
 {
 	public class ArmAsmDataBase
 	{
+		public delegate MemInfo GetMatchingMemory(string memory);
 		public delegate void ProgressBarUpdate(object obj, ProgressChangedEventArgs arg);
 		enum LoadType
 		{
@@ -111,7 +112,7 @@ namespace ArmAssembly
 		public MemInfo GetMemoryRow(string memory)
 		{
 			uint uiMemory = Convert.ToUInt32(memory, 16);
-			MapElements mapData = MapList.ElementList.Find(x => (x.Memory <= uiMemory) && (uiMemory < (x.Memory + x.Size)));
+			MapElements mapData = MapList.ElementList.Find(x => (x.Memory <= uiMemory) && (uiMemory < (x.Memory + x.Size)) && (!x.Symbol.Equals("(0x4)")));
 			LssElements lssData = LssList.ElementList.Find(x => (x.Memory == uiMemory));
 
 			if (lssData != null)
@@ -128,8 +129,19 @@ namespace ArmAssembly
 				return null;
 		}
 
+		/// <summary>
+		/// 해당 주소(ItemAddress)에 맞는 lss구간 인덱스와 LssList를 반환
+		/// </summary>
+		/// <param name="ItemAddress"></param>
+		/// <param name="StartIndex"></param>
+		/// <param name="EndIndex"></param>
+		/// <returns></returns>
 		public LssContainer FindMatchingLss(uint ItemAddress, ref int StartIndex, ref int EndIndex)
 		{
+			if(LssList == null)
+			{
+				return null;
+			}
 			int SymbolIndex = LssList.SymbolList.FindIndex(x => (x.Memory == ItemAddress));
 			if (SymbolIndex < 0)
 			{
