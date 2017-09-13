@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace ArmAssembly
 {
-	public delegate string GetValue(MemInfo refer);
-	public delegate bool SetValue(MemInfo refer);
+	public delegate bool ArmValueHandler(ref MemInfo refer);
 	public class AsmInterpreter
 	{
-		GetValue getValue;
-		SetValue setValue;
+		ArmValueHandler getValue;
+		ArmValueHandler setValue;
 		public enum ParamType
 		{
 			Register,
@@ -24,7 +23,7 @@ namespace ArmAssembly
 			None
 		};
 
-		public AsmInterpreter(GetValue argGet, SetValue argSet)
+		public AsmInterpreter(ArmValueHandler argGet, ArmValueHandler argSet)
 		{
 			getValue = argGet;
 			setValue = argSet;
@@ -43,17 +42,17 @@ namespace ArmAssembly
 		// 9 element type
 		public void ParseInstruction(string Instruction, string Parameter)
 		{
-			if (Instruction.Equals("mov") || Instruction.Equals("movs"))
+			if (Instruction.Equals("mov") || Instruction.Equals("movb") || Instruction.Equals("movs") || Instruction.Equals("mov.w"))
 			{
 				string[] Pars = SplitParam(Parameter);
 				Move(Pars[0], Pars[1]);
 			}
-			if (Instruction.Equals("str") || Instruction.Equals("strb"))
+			if (Instruction.Equals("str") || Instruction.Equals("strb") || Instruction.Equals("strs") || Instruction.Equals("str.w"))
 			{
 				string[] Pars = SplitParam(Parameter);
 				Move(Pars[1], Pars[0]);
 			}
-			if (Instruction.Equals("ldr") || Instruction.Equals("ldrb"))
+			if (Instruction.Equals("ldr") || Instruction.Equals("ldrb") || Instruction.Equals("ldrs") || Instruction.Equals("ldr.w"))
 			{
 				string[] Pars = SplitParam(Parameter);
 				Move(Pars[0], Pars[1]);
@@ -62,7 +61,13 @@ namespace ArmAssembly
 
 		public bool Move(string dstOperand, string srcOperand)
 		{
-			uint pc = Convert.ToUInt32(getValue(new MemInfo("r15", null, null, MemInfo.MemArea.REGISTER)), 16);
+			MemInfo info = new MemInfo("r15", null, null, MemInfo.MemArea.REGISTER);
+			if(!getValue(ref info))
+			{
+				return false;
+			}
+			
+			uint pc = Convert.ToUInt32(info.Value, 16);
 			ParamType dstType = ParamType.None;
 			ParamType srcType = ParamType.None;
 			string src = ParseToHexString(pc, srcOperand, ref srcType);
@@ -72,18 +77,21 @@ namespace ArmAssembly
 			// src 값을 srcResult에 저장
 			if (srcType == ParamType.Register)
 			{
-				srcResult = getValue(new MemInfo(src, null, null, MemInfo.MemArea.REGISTER));
+				info = new MemInfo(src, null, null, MemInfo.MemArea.REGISTER);
+				if (getValue(ref info))
+					srcResult = info.Value;
+				else
+					return false;
 			}
 			else if ((srcType == ParamType.RegRelativeAddress) ||
 				(srcType == ParamType.PcRelativeAddress) ||
 				(srcType == ParamType.AbsoluteAddress))
 			{
-				srcResult = getValue(new MemInfo(src, null, null, MemInfo.MemArea.DATA));
-
-				if (srcResult == null)
-				{
+				info = new MemInfo(src, null, null, MemInfo.MemArea.DATA);
+				if (getValue(ref info))
+					srcResult = info.Value;
+				else
 					return false;
-				}
 			}
 			else if(srcType == ParamType.StackRelativeAddress)
 			{
@@ -97,15 +105,18 @@ namespace ArmAssembly
 			// srcResult값을 dst에 저장
 			if (dstType == ParamType.Register)
 			{
-				setValue(new MemInfo(dest, null, srcResult, MemInfo.MemArea.REGISTER));
+				info = new MemInfo(dest, null, srcResult, MemInfo.MemArea.REGISTER);
+				if (!setValue(ref info))
+				{
+					return false;
+				}
 			}
 			else if ((dstType == ParamType.RegRelativeAddress) ||
 				(dstType == ParamType.PcRelativeAddress) ||
 				(dstType == ParamType.AbsoluteAddress))
 			{
-				bool ret = setValue(new MemInfo(dest, null, srcResult, MemInfo.MemArea.DATA));
-
-				if (ret == false)
+				info = new MemInfo(dest, null, srcResult, MemInfo.MemArea.DATA);
+				if (!setValue(ref info))
 				{
 					return false;
 				}
@@ -182,8 +193,12 @@ namespace ArmAssembly
 					if(item[0] == 'r')
 					{
 						type = ParamType.RegRelativeAddress;
-						string reg_val = getValue(new MemInfo(item, null, null, MemInfo.MemArea.REGISTER));
-						result = AddHexString(result, reg_val);
+						MemInfo info = new MemInfo(item, null, null, MemInfo.MemArea.REGISTER);
+						if(getValue(ref info))
+						{
+							string reg_val = info.Value;
+							result = AddHexString(result, reg_val);
+						}
 					}
 					else if (item.Equals("pc"))
 					{
@@ -199,8 +214,12 @@ namespace ArmAssembly
 					else if (item.Equals("lr"))
 					{
 						type = ParamType.RegRelativeAddress;
-						string reg_val = getValue(new MemInfo("r14", null, null, MemInfo.MemArea.REGISTER));
-						result = AddHexString(result, reg_val);
+						MemInfo info = new MemInfo("r14", null, null, MemInfo.MemArea.REGISTER);
+						if (getValue(ref info))
+						{
+							string reg_val = info.Value;
+							result = AddHexString(result, reg_val);
+						}
 					}
 					else if(item[0] == '#')
 					{
@@ -311,6 +330,7 @@ namespace ArmAssembly
 			DATA,
 			STACK,
 			REGISTER,
+			PERIPHERAL,
 			NONE
 		};
 		public string MemAddr;

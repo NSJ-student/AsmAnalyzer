@@ -185,7 +185,7 @@ namespace ArmAssembly
 		}
 
 
-		private string GetValue(MemInfo refer)
+		private bool GetValue(ref MemInfo refer)
 		{
 			MemInfo info = refer;
 			switch(info.Area)
@@ -194,16 +194,16 @@ namespace ArmAssembly
 				case MemInfo.MemArea.DATA:
 				case MemInfo.MemArea.WORD:
 				case MemInfo.MemArea.RODATA:
-					return GetRamValue(info);
+					return GetRamValue(ref refer);
 				case MemInfo.MemArea.REGISTER:
-					return GetRegValue(info);
+					return GetRegValue(ref refer);
 				case MemInfo.MemArea.STACK:
-					return GetStackValue(info);
+					return GetStackValue(ref refer);
 				default:
-					return null;
+					return false;
 			}
 		}
-		private bool SetValue(MemInfo refer)
+		private bool SetValue(ref MemInfo refer)
 		{
 			switch (refer.Area)
 			{
@@ -211,29 +211,50 @@ namespace ArmAssembly
 				case MemInfo.MemArea.DATA:
 				case MemInfo.MemArea.WORD:
 				case MemInfo.MemArea.RODATA:
-					return PutRamValue(refer);
+					return PutRamValue(ref refer);
 				case MemInfo.MemArea.REGISTER:
-					return PutRegValue(refer);
+					return PutRegValue(ref refer);
 				case MemInfo.MemArea.STACK:
-					return PutStackValue(refer);
+					return PutStackValue(ref refer);
 				default:
 					return false;
 			}
 		}
 
-		private string GetStackValue(MemInfo info)
-		{
-			return null;
-		}
-		private bool PutStackValue(MemInfo info)
+		private bool GetStackValue(ref MemInfo refer)
 		{
 			return false;
 		}
-		private string GetRamValue(MemInfo info)
+		private bool PutStackValue(ref MemInfo refer)
 		{
-			MemInfo outinfo = GetMemRow(info.MemAddr);
+			return false;
+		}
+		private bool GetRamValue(ref MemInfo refer)
+		{
+			MemInfo outinfo = GetMemRow(refer.MemAddr);
+			
+			if (outinfo == null)
+			{
+				ListViewItem[] items = lvRam.Items.Find(outinfo.MemAddr, true);
+				if (items.Length != 0)
+				{
+					// Define the list items
+					ListViewItem lvi = new ListViewItem(refer.MemAddr);
+					lvi.SubItems.Add("Get Failed");
+					lvi.SubItems.Add("0");
 
-			if((outinfo.Area == MemInfo.MemArea.BSS)||
+					// Add the list items to the ListView
+					lvRam.Items.Add(lvi);
+					return false;
+				}
+				else
+				{
+					refer.Area = MemInfo.MemArea.PERIPHERAL;
+					refer.Value = items[0].SubItems[2].Text;
+					return true;
+				}
+			}
+			else if ((outinfo.Area == MemInfo.MemArea.BSS)||
 				(outinfo.Area == MemInfo.MemArea.DATA)
 				)
 			{
@@ -247,9 +268,14 @@ namespace ArmAssembly
 
 					// Add the list items to the ListView
 					lvRam.Items.Add(lvi);
-					return outinfo.Value;
+					refer.Value = outinfo.Value;
 				}
-				return items[0].SubItems[2].Text;
+				else
+				{
+					refer.Value = items[0].SubItems[2].Text;
+				}
+				refer.Area = outinfo.Area;
+				return true;
 			}
 			else if (outinfo.Area == MemInfo.MemArea.RODATA)
 			{
@@ -264,22 +290,49 @@ namespace ArmAssembly
 					// Add the list items to the ListView
 					lvRam.Items.Add(lvi);
 				}
-				return outinfo.Value;
+				refer.Value = outinfo.Value;
+				refer.Area = outinfo.Area;
+				return true;
+			}
+			else if (outinfo.Area == MemInfo.MemArea.WORD)
+			{
+				refer.Value = outinfo.Value;
+				refer.Area = outinfo.Area;
+				return true;
 			}
 			else
 			{
-				return outinfo.Value;
+				return false;
 			}
 		}
-		private bool PutRamValue(MemInfo info)
+		private bool PutRamValue(ref MemInfo refer)
 		{
-			MemInfo outinfo = GetMemRow(info.MemAddr);
+			MemInfo outinfo = GetMemRow(refer.MemAddr);
+			if (outinfo == null)
+			{
+				ListViewItem[] items = lvRam.Items.Find(refer.MemAddr, true);
 
-			if ((outinfo.Area == MemInfo.MemArea.BSS) ||
+				if (items.Length == 0)
+				{
+					// Define the list items
+					ListViewItem lvi = new ListViewItem(refer.MemAddr);
+					lvi.SubItems.Add("Unknown");
+					lvi.SubItems.Add(refer.Value);
+
+					// Add the list items to the ListView
+					lvRam.Items.Add(lvi);
+				}
+				else
+				{
+					items[0].SubItems[2].Text = refer.Value;
+				}
+				return true;
+			}
+			else if ((outinfo.Area == MemInfo.MemArea.BSS) ||
 				(outinfo.Area == MemInfo.MemArea.DATA)
 				)
 			{
-				ListViewItem[] items = lvRam.Items.Find(info.MemAddr, true);
+				ListViewItem[] items = lvRam.Items.Find(refer.MemAddr, true);
 				if (items.Length == 0)
 				{
 					// Define the list items
@@ -292,7 +345,7 @@ namespace ArmAssembly
 				}
 				else
 				{
-					items[0].SubItems[2].Text = info.Value;
+					items[0].SubItems[2].Text = refer.Value;
 				}
 				return true;
 			}
@@ -301,14 +354,15 @@ namespace ArmAssembly
 				return false;
 			}
 		}
-		private string GetRegValue(MemInfo info)
+		private bool GetRegValue(ref MemInfo refer)
 		{
-			string regnum = info.MemAddr.Replace("r", "").Trim();
+			string regnum = refer.MemAddr.Replace("r", "").Trim();
 			string RegValue = RegArray[Convert.ToUInt32(regnum)].txtValue.Text;
 
 			if (RegValue.Length == 0)
 			{
-				return info.MemAddr;
+				refer.Area = MemInfo.MemArea.REGISTER;
+				return true;
 			}
 			else
 			{
@@ -316,18 +370,20 @@ namespace ArmAssembly
 				if (Format.Equals("DEX"))
 				{
 					uint value = Convert.ToUInt32(RegValue);
-					return value.ToString("X");
+					refer.Value = value.ToString("X");
+					return true;
 				}
 				else
 				{
-					return RegValue;
+					refer.Value = RegValue;
+					return true;
 				}
 			}
 		}
-		private bool PutRegValue(MemInfo info)
+		private bool PutRegValue(ref MemInfo refer)
 		{
-			string regnum = info.MemAddr.Replace("r", "").Trim();
-			RegArray[Convert.ToUInt32(regnum)].txtValue.Text = info.Value;
+			string regnum = refer.MemAddr.Replace("r", "").Trim();
+			RegArray[Convert.ToUInt32(regnum)].txtValue.Text = refer.Value;
 
 			return true;
 		}
