@@ -133,6 +133,80 @@ namespace ArmAssembly
 			return true;
 		}
 
+		public string Add(string Operand1, string Operand2)
+		{
+			MemInfo info = new MemInfo("r15", null, null, MemInfo.MemArea.REGISTER);
+			if (!getValue(ref info))
+			{
+				return null;
+			}
+
+			uint pc = Convert.ToUInt32(info.Value, 16);
+			ParamType Op1Type = ParamType.None;
+			ParamType Op2Type = ParamType.None;
+			string Op1 = ParseToHexString(pc, Operand1, ref Op1Type);
+			string Op2 = ParseToHexString(pc, Operand2, ref Op2Type);
+			string Op1Result, Op2Result;
+
+			// src 값을 srcResult에 저장
+			if (Op1Type == ParamType.Register)
+			{
+				info = new MemInfo(Op1, null, null, MemInfo.MemArea.REGISTER);
+				if (getValue(ref info))
+					Op1Result = info.Value;
+				else
+					return null;
+			}
+			else if ((Op1Type == ParamType.RegRelativeAddress) ||
+				(Op1Type == ParamType.PcRelativeAddress) ||
+				(Op1Type == ParamType.AbsoluteAddress))
+			{
+				info = new MemInfo(Op1, null, null, MemInfo.MemArea.DATA);
+				if (getValue(ref info))
+					Op1Result = info.Value;
+				else
+					return null;
+			}
+			else if (Op1Type == ParamType.StackRelativeAddress)
+			{
+				return null;
+			}
+			else
+			{
+				Op1Result = Op1;
+			}
+
+			// srcResult값을 dst에 저장
+			if (Op2Type == ParamType.Register)
+			{
+				info = new MemInfo(Op2, null, null, MemInfo.MemArea.REGISTER);
+				if (getValue(ref info))
+					Op2Result = info.Value;
+				else
+					return null;
+			}
+			else if ((Op2Type == ParamType.RegRelativeAddress) ||
+				(Op2Type == ParamType.PcRelativeAddress) ||
+				(Op2Type == ParamType.AbsoluteAddress))
+			{
+				info = new MemInfo(Op2, null, null, MemInfo.MemArea.DATA);
+				if (getValue(ref info))
+					Op2Result = info.Value;
+				else
+					return null;
+			}
+			else if (Op2Type == ParamType.StackRelativeAddress)
+			{
+				return null;
+			}
+			else
+			{
+				Op2Result = Op2;
+			}
+
+			return AddHexString(Op1Result, Op2Result);
+		}
+
 		public string AddHexString(string Old, string AddHex)
 		{
 			string result = Old;

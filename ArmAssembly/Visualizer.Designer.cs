@@ -721,21 +721,21 @@
 			// 
 			// txtInst
 			// 
-			this.txtInst.Location = new System.Drawing.Point(71, 37);
+			this.txtInst.Location = new System.Drawing.Point(70, 24);
 			this.txtInst.Name = "txtInst";
 			this.txtInst.Size = new System.Drawing.Size(55, 25);
 			this.txtInst.TabIndex = 1;
 			// 
 			// txtParam1
 			// 
-			this.txtParam1.Location = new System.Drawing.Point(71, 67);
+			this.txtParam1.Location = new System.Drawing.Point(70, 55);
 			this.txtParam1.Name = "txtParam1";
 			this.txtParam1.Size = new System.Drawing.Size(55, 25);
 			this.txtParam1.TabIndex = 2;
 			// 
 			// txtParam2
 			// 
-			this.txtParam2.Location = new System.Drawing.Point(71, 97);
+			this.txtParam2.Location = new System.Drawing.Point(70, 86);
 			this.txtParam2.Name = "txtParam2";
 			this.txtParam2.Size = new System.Drawing.Size(55, 25);
 			this.txtParam2.TabIndex = 3;
@@ -754,16 +754,16 @@
 			this.gbInput.Controls.Add(this.txtInst);
 			this.gbInput.Controls.Add(this.txtParam2);
 			this.gbInput.Controls.Add(this.txtParam1);
-			this.gbInput.Location = new System.Drawing.Point(226, 12);
+			this.gbInput.Location = new System.Drawing.Point(226, 60);
 			this.gbInput.Name = "gbInput";
-			this.gbInput.Size = new System.Drawing.Size(214, 202);
+			this.gbInput.Size = new System.Drawing.Size(214, 180);
 			this.gbInput.TabIndex = 4;
 			this.gbInput.TabStop = false;
 			this.gbInput.Text = "Inputs";
 			// 
 			// txtParam3ToHex
 			// 
-			this.txtParam3ToHex.Location = new System.Drawing.Point(132, 127);
+			this.txtParam3ToHex.Location = new System.Drawing.Point(131, 117);
 			this.txtParam3ToHex.Name = "txtParam3ToHex";
 			this.txtParam3ToHex.Size = new System.Drawing.Size(62, 25);
 			this.txtParam3ToHex.TabIndex = 12;
@@ -771,7 +771,7 @@
 			// label4
 			// 
 			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(11, 130);
+			this.label4.Location = new System.Drawing.Point(10, 120);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(54, 15);
 			this.label4.TabIndex = 11;
@@ -779,28 +779,28 @@
 			// 
 			// txtParam3
 			// 
-			this.txtParam3.Location = new System.Drawing.Point(71, 127);
+			this.txtParam3.Location = new System.Drawing.Point(70, 117);
 			this.txtParam3.Name = "txtParam3";
 			this.txtParam3.Size = new System.Drawing.Size(55, 25);
 			this.txtParam3.TabIndex = 10;
 			// 
 			// txtInputAll
 			// 
-			this.txtInputAll.Location = new System.Drawing.Point(14, 158);
+			this.txtInputAll.Location = new System.Drawing.Point(13, 148);
 			this.txtInputAll.Name = "txtInputAll";
 			this.txtInputAll.Size = new System.Drawing.Size(180, 25);
 			this.txtInputAll.TabIndex = 9;
 			// 
 			// txtParam2ToHex
 			// 
-			this.txtParam2ToHex.Location = new System.Drawing.Point(132, 97);
+			this.txtParam2ToHex.Location = new System.Drawing.Point(131, 86);
 			this.txtParam2ToHex.Name = "txtParam2ToHex";
 			this.txtParam2ToHex.Size = new System.Drawing.Size(62, 25);
 			this.txtParam2ToHex.TabIndex = 8;
 			// 
 			// txtParam1ToHex
 			// 
-			this.txtParam1ToHex.Location = new System.Drawing.Point(132, 67);
+			this.txtParam1ToHex.Location = new System.Drawing.Point(131, 55);
 			this.txtParam1ToHex.Name = "txtParam1ToHex";
 			this.txtParam1ToHex.Size = new System.Drawing.Size(62, 25);
 			this.txtParam1ToHex.TabIndex = 7;
@@ -808,7 +808,7 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(11, 100);
+			this.label3.Location = new System.Drawing.Point(10, 89);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(54, 15);
 			this.label3.TabIndex = 6;
@@ -817,7 +817,7 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(11, 70);
+			this.label2.Location = new System.Drawing.Point(10, 58);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(54, 15);
 			this.label2.TabIndex = 5;
@@ -826,7 +826,7 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(11, 40);
+			this.label1.Location = new System.Drawing.Point(10, 27);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(30, 15);
 			this.label1.TabIndex = 4;
@@ -836,14 +836,14 @@
 			// 
 			this.lbStack.FormattingEnabled = true;
 			this.lbStack.ItemHeight = 15;
-			this.lbStack.Location = new System.Drawing.Point(226, 246);
+			this.lbStack.Location = new System.Drawing.Point(226, 275);
 			this.lbStack.Name = "lbStack";
 			this.lbStack.Size = new System.Drawing.Size(214, 94);
 			this.lbStack.TabIndex = 5;
 			// 
 			// pbRegClear
 			// 
-			this.pbRegClear.Location = new System.Drawing.Point(226, 501);
+			this.pbRegClear.Location = new System.Drawing.Point(365, 246);
 			this.pbRegClear.Name = "pbRegClear";
 			this.pbRegClear.Size = new System.Drawing.Size(75, 23);
 			this.pbRegClear.TabIndex = 6;
@@ -859,7 +859,7 @@
             this.chValue});
 			this.lvRam.FullRowSelect = true;
 			this.lvRam.GridLines = true;
-			this.lvRam.Location = new System.Drawing.Point(226, 375);
+			this.lvRam.Location = new System.Drawing.Point(226, 404);
 			this.lvRam.Name = "lvRam";
 			this.lvRam.Size = new System.Drawing.Size(214, 120);
 			this.lvRam.TabIndex = 7;
@@ -883,7 +883,7 @@
 			// 
 			this.lblStack.AutoSize = true;
 			this.lblStack.Font = new System.Drawing.Font("Gulim", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-			this.lblStack.Location = new System.Drawing.Point(226, 225);
+			this.lblStack.Location = new System.Drawing.Point(226, 254);
 			this.lblStack.Name = "lblStack";
 			this.lblStack.Size = new System.Drawing.Size(55, 15);
 			this.lblStack.TabIndex = 8;
@@ -893,7 +893,7 @@
 			// 
 			this.label5.AutoSize = true;
 			this.label5.Font = new System.Drawing.Font("Gulim", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-			this.label5.Location = new System.Drawing.Point(226, 353);
+			this.label5.Location = new System.Drawing.Point(226, 382);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(45, 15);
 			this.label5.TabIndex = 8;
